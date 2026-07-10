@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Archived Recipes</title>
+<meta name="theme-color" content="#faf5ec">
+<title>Isaac's Recipes</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Recipes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -60,32 +67,19 @@
     box-shadow: var(--shadow);
   }
   #search:focus { border-color: var(--accent); }
+  .search-hint {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
 
-  .layout {
-    max-width: 1200px;
-    margin: 24px auto 60px;
+  .filters {
+    max-width: 1060px;
+    margin: 18px auto 0;
     padding: 0 20px;
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    gap: 28px;
-    align-items: start;
   }
-  .sidebar {
-    position: sticky;
-    top: 20px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 18px;
-  }
-  .sidebar-title {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.05rem;
-    font-weight: 700;
-    margin-bottom: 14px;
-  }
-  .filter-group { margin-bottom: 14px; }
+  .filter-group { margin-bottom: 12px; }
   .filter-label {
     font-size: 0.72rem;
     font-weight: 600;
@@ -129,21 +123,45 @@
   }
   #clear-filters.visible { display: inline-block; }
 
+  /* Toolbar: sort / favourites / surprise */
+  .toolbar {
+    max-width: 1060px;
+    margin: 16px auto 0;
+    padding: 0 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  #sort {
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+  }
+  #sort:focus { border-color: var(--accent); }
+  #fav-toggle.on { background: #c0392b; border-color: #c0392b; color: #fff; }
+
   .count {
+    max-width: 1060px;
+    margin: 18px auto 0;
+    padding: 0 20px;
     color: var(--ink-soft);
     font-size: 0.85rem;
   }
 
   .grid {
-    margin-top: 12px;
+    max-width: 1060px;
+    margin: 12px auto 60px;
+    padding: 0 20px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
-  }
-
-  @media (max-width: 760px) {
-    .layout { display: block; }
-    .sidebar { position: static; margin-bottom: 20px; }
   }
   .card {
     background: var(--card);
@@ -157,6 +175,7 @@
     flex-direction: column;
   }
   .card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(90,60,40,0.14); }
+  .card-img-wrap { position: relative; }
   .card-img {
     width: 100%;
     height: 160px;
@@ -172,6 +191,34 @@
     align-items: center;
     justify-content: center;
     font-size: 2.6rem;
+  }
+  .fav-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(255, 253, 248, 0.9);
+    font-size: 1.05rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    line-height: 1;
+  }
+  .fav-btn.on { color: #c0392b; }
+  .new-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
   }
   .card-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
   .card-title {
@@ -231,7 +278,7 @@
     font-weight: 700;
     margin-bottom: 10px;
   }
-  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
   .modal h3 {
     font-family: 'Fraunces', Georgia, serif;
     font-size: 1.05rem;
@@ -239,16 +286,20 @@
     color: var(--accent);
   }
   .modal ul, .modal ol { padding-left: 22px; display: flex; flex-direction: column; gap: 6px; font-size: 0.93rem; line-height: 1.5; }
+  .modal ul li, .modal ol li { cursor: pointer; }
+  li.done { text-decoration: line-through; opacity: 0.45; }
   .modal .notes { font-size: 0.9rem; color: var(--ink-soft); font-style: italic; margin-top: 14px; }
   .modal .source-link {
     display: inline-block;
     margin-top: 18px;
+    margin-right: 16px;
     color: var(--accent);
     font-weight: 600;
     font-size: 0.9rem;
     text-decoration: none;
   }
   .modal .source-link:hover { text-decoration: underline; }
+  .modal .date-added { margin-top: 14px; font-size: 0.75rem; color: var(--ink-soft); }
   .modal-close {
     position: sticky;
     top: 0;
@@ -264,39 +315,330 @@
     color: var(--ink);
     z-index: 2;
   }
+
+  /* Modal action row */
+  .action-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+  .abtn {
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+    padding: 7px 13px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .abtn:hover { border-color: var(--accent); }
+  .abtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .abtn.on { background: var(--green); border-color: var(--green); color: #fff; }
+  .abtn.fav-on { background: #c0392b; border-color: #c0392b; color: #fff; }
+
+  /* Scale + unit rows */
+  .scale-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 6px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-radius: 12px;
+  }
+  .seg { display: inline-flex; border: 1.5px solid var(--border); border-radius: 999px; overflow: hidden; background: var(--card); }
+  .seg button {
+    border: none;
+    background: none;
+    padding: 5px 11px;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .seg button.on { background: var(--accent); color: #fff; font-weight: 600; }
+  .seg-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
+  .serves-note { font-size: 0.78rem; color: var(--ink-soft); }
+  .reset-checks {
+    background: none; border: none; color: var(--accent);
+    font: inherit; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; text-decoration: underline; margin-left: 8px;
+  }
+
+  /* Inline step timers */
+  .step-timer {
+    border: none;
+    background: var(--gold-soft);
+    color: #8a661f;
+    font: inherit;
+    font-size: 0.85em;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .step-timer:hover { background: var(--gold); color: #fff; }
+
+  /* Timer chips */
+  #timers {
+    position: fixed;
+    left: 14px;
+    bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 90;
+  }
+  .timer-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ink);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+  .timer-chip .t-count { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .timer-chip.finished { background: var(--accent); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { transform: scale(1.05); } }
+  .timer-chip button {
+    background: none; border: none; color: #fff; cursor: pointer;
+    font-size: 0.9rem; line-height: 1; padding: 2px;
+  }
+
+  /* Cook mode */
+  .cook-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+  }
+  .cook-overlay.open { display: flex; }
+  .cook-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px 8px;
+  }
+  .cook-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cook-progress-wrap { padding: 0 16px; }
+  .cook-progress-bar { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+  .cook-progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.25s ease; }
+  .cook-progress-text { font-size: 0.78rem; color: var(--ink-soft); margin-top: 6px; text-align: center; }
+  .cook-step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 24px;
+    text-align: center;
+    font-size: clamp(1.25rem, 4.5vw, 1.9rem);
+    line-height: 1.5;
+    font-weight: 500;
+    overflow-y: auto;
+  }
+  .cook-nav {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+  .cook-nav button {
+    flex: 1;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    font: inherit;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .cook-nav button:disabled { opacity: 0.35; cursor: default; }
+  .cook-nav .cook-next { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .wake-note { text-align: center; font-size: 0.7rem; color: var(--ink-soft); padding-bottom: 6px; }
+  .cook-ing-drawer {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    max-height: 65vh;
+    overflow-y: auto;
+    background: var(--card);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.2);
+    padding: 20px 24px calc(24px + env(safe-area-inset-bottom));
+    display: none;
+  }
+  .cook-ing-drawer.open { display: block; }
+  .cook-ing-drawer h3 { font-family: 'Fraunces', Georgia, serif; color: var(--accent); margin-bottom: 10px; }
+  .cook-ing-drawer ul { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.95rem; }
+  .cook-ing-drawer li { cursor: pointer; }
+
+  /* Shopping list */
+  .fab {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(90,60,40,0.3);
+    z-index: 80;
+    display: none;
+  }
+  .fab.visible { display: block; }
+  .fab .fab-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--ink);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+  }
+  .shop-recipes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .shop-recipe-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-soft);
+    color: #9c4526;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .shop-recipe-chip button { background: none; border: none; cursor: pointer; color: inherit; font-size: 0.85rem; line-height: 1; padding: 0; }
+  .shop-list { list-style: none; padding: 0 !important; }
+  .shop-list li { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+  .shop-list input[type=checkbox] { margin-top: 4px; accent-color: var(--accent); }
+  .shop-list .x-count { color: var(--accent); font-weight: 600; font-size: 0.8rem; }
+  .shop-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .shop-empty { color: var(--ink-soft); font-size: 0.9rem; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 120;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   footer {
     text-align: center;
     padding: 0 20px 40px;
     color: var(--ink-soft);
     font-size: 0.8rem;
   }
+
+  /* Print: just the open recipe, clean */
+  @media print {
+    header, .search-wrap, .search-hint, .filters, .toolbar, .count, .grid, footer,
+    .fab, #timers, #toast, .cook-overlay, .shop-overlay,
+    .modal-close, .action-row, .scale-row, .reset-checks { display: none !important; }
+    body { background: #fff; }
+    .modal-overlay { position: static; display: block !important; padding: 0; background: none; overflow: visible; }
+    .modal-overlay:not(.open) { display: none !important; }
+    .modal { box-shadow: none; max-width: 100%; border-radius: 0; }
+    .modal-img { max-height: 220px; }
+    li.done { text-decoration: none; opacity: 1; }
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Archived <span>Recipes</span></h1>
+  <h1>Isaac's <span>Recipes</span></h1>
   <p>A growing collection of things worth cooking</p>
 </header>
 
 <div class="search-wrap">
   <input id="search" type="search" placeholder="Search recipes…" aria-label="Search recipes">
+  <div class="search-hint">Tip: list what's in your fridge — e.g. “yogurt, lemon” — to find recipes using all of them</div>
 </div>
 
-<div class="layout">
-  <aside class="sidebar">
-    <div class="sidebar-title">Filter by tag</div>
-    <div class="filters" id="filters"></div>
-  </aside>
-  <section>
-    <div class="count" id="count"></div>
-    <main class="grid" id="grid"></main>
-  </section>
+<div class="filters" id="filters"></div>
+
+<div class="toolbar">
+  <select id="sort" aria-label="Sort recipes">
+    <option value="new">Newest first</option>
+    <option value="az">A–Z</option>
+    <option value="quick">Quickest first</option>
+  </select>
+  <button type="button" id="fav-toggle" class="chip">♥ Favourites</button>
+  <button type="button" id="surprise" class="chip">🎲 Surprise me</button>
 </div>
+
+<div class="count" id="count"></div>
+<main class="grid" id="grid"></main>
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
 </div>
+
+<div class="modal-overlay shop-overlay" id="shop-overlay">
+  <div class="modal" id="shop-modal" role="dialog" aria-modal="true"></div>
+</div>
+
+<div class="cook-overlay" id="cook-overlay">
+  <div class="cook-top">
+    <button type="button" class="abtn" id="cook-exit">✕ Exit</button>
+    <div class="cook-title" id="cook-title"></div>
+    <button type="button" class="abtn" id="cook-ing-btn">🥕 Ingredients</button>
+  </div>
+  <div class="cook-progress-wrap">
+    <div class="cook-progress-bar"><div class="cook-progress-fill" id="cook-fill"></div></div>
+    <div class="cook-progress-text" id="cook-progress"></div>
+  </div>
+  <div class="cook-step" id="cook-step"></div>
+  <div class="wake-note" id="wake-note"></div>
+  <div class="cook-nav">
+    <button type="button" id="cook-prev">← Back</button>
+    <button type="button" class="cook-next" id="cook-next">Next →</button>
+  </div>
+  <div class="cook-ing-drawer" id="cook-drawer">
+    <h3>Ingredients</h3>
+    <ul id="cook-ing-list"></ul>
+  </div>
+</div>
+
+<button type="button" class="fab" id="cart-fab" aria-label="Shopping list">🛒<span class="fab-count" id="cart-count"></span></button>
+<div id="timers"></div>
+<div id="toast"></div>
 
 <footer>Scan &amp; cook · updated whenever something delicious shows up</footer>
 
@@ -304,6 +646,8 @@
 <script>
 (function () {
   var RECIPES = window.RECIPES || [];
+  var byId = {};
+  RECIPES.forEach(function (r) { byId[r.id] = r; });
 
   // ---- Tag definitions --------------------------------------------------
   var CATEGORY_EMOJI = {
@@ -320,8 +664,6 @@
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   function uniq(arr) { return arr.filter(function (v, i) { return arr.indexOf(v) === i; }); }
 
-  // Categories & flavors shown = whatever the recipes actually use
-  // (plus nothing extra, so chips never point at empty results).
   var categories = uniq(RECIPES.map(function (r) { return r.category; }).filter(Boolean)).sort();
   var flavors = uniq([].concat.apply([], RECIPES.map(function (r) { return r.flavors || []; }))).sort(function (a, b) {
     var ai = CORE_FLAVORS.indexOf(a), bi = CORE_FLAVORS.indexOf(b);
@@ -329,9 +671,209 @@
     return ai - bi || a.localeCompare(b);
   });
 
+  // ---- Storage helpers ----------------------------------------------------
+  function lsGet(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+  var favs = lsGet("ir-favs", []);                 // array of recipe ids
+  var cart = lsGet("ir-cart", []);                 // array of recipe ids
+  var checks = lsGet("ir-checks", {});             // { id: { i:[...], s:[...] } }
+  var shopChecks = lsGet("ir-shopchk", {});        // { ingredientKey: true }
+  var unitMode = lsGet("ir-units", "orig");        // "orig" | "metric"
+  var sortMode = lsGet("ir-sort", "new");
+
+  function isFav(id) { return favs.indexOf(id) !== -1; }
+  function toggleFav(id) {
+    var i = favs.indexOf(id);
+    if (i === -1) favs.push(id); else favs.splice(i, 1);
+    lsSet("ir-favs", favs);
+  }
+  function getChecks(id) {
+    if (!checks[id]) checks[id] = { i: [], s: [] };
+    return checks[id];
+  }
+  function setCheck(id, kind, idx, val) {
+    var arr = getChecks(id)[kind];
+    var p = arr.indexOf(idx);
+    if (val && p === -1) arr.push(idx);
+    if (!val && p !== -1) arr.splice(p, 1);
+    lsSet("ir-checks", checks);
+  }
+
+  // ---- Toast ---------------------------------------------------------------
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2200);
+  }
+
+  // ---- Quantity parsing / scaling -------------------------------------------
+  var UNI_FRAC = { "½": 0.5, "⅓": 1 / 3, "⅔": 2 / 3, "¼": 0.25, "¾": 0.75, "⅛": 0.125, "⅜": 0.375, "⅝": 0.625, "⅞": 0.875 };
+  var FRACS = [[0.125, "⅛"], [0.25, "¼"], [1 / 3, "⅓"], [0.375, "⅜"], [0.5, "½"], [0.625, "⅝"], [2 / 3, "⅔"], [0.75, "¾"], [0.875, "⅞"]];
+
+  function fmtQty(n) {
+    if (n <= 0) return "0";
+    if (n >= 10) return String(Math.round(n));
+    var whole = Math.floor(n), rem = n - whole;
+    if (rem < 0.04) return String(whole || Math.round(n * 100) / 100);
+    var best = null, bd = 1;
+    for (var i = 0; i < FRACS.length; i++) {
+      var d = Math.abs(rem - FRACS[i][0]);
+      if (d < bd) { bd = d; best = FRACS[i][1]; }
+    }
+    if (bd <= 0.04) return (whole ? whole : "") + best;
+    return String(Math.round(n * 100) / 100);
+  }
+
+  // Matches (in priority order): mixed "1 1/2" | "1/2" | "1½" | "1.5" | "½"
+  var QTY_RE = /(\d+)\s+(\d+)\s*\/\s*(\d+)|(\d+)\s*\/\s*(\d+)|(\d+(?:\.\d+)?)\s*([½⅓⅔¼¾⅛⅜⅝⅞])|(\d+(?:\.\d+)?)|([½⅓⅔¼¾⅛⅜⅝⅞])/g;
+
+  function scaleLine(line, factor) {
+    if (factor === 1) return line;
+    return line.replace(QTY_RE, function (m, mw, mn, md, fn, fd, dw, df, num, uf) {
+      var v;
+      if (mw !== undefined) v = parseInt(mw, 10) + parseInt(mn, 10) / parseInt(md, 10);
+      else if (fn !== undefined) v = parseInt(fn, 10) / parseInt(fd, 10);
+      else if (dw !== undefined) v = parseFloat(dw) + UNI_FRAC[df];
+      else if (num !== undefined) v = parseFloat(num);
+      else v = UNI_FRAC[uf];
+      return fmtQty(v * factor);
+    });
+  }
+
+  function parseQtyToken(str) {
+    // parse a quantity string like "1 1/2", "1½", "0.75", "⅓" into a number
+    var total = 0, matched = false;
+    str.replace(QTY_RE, function (m, mw, mn, md, fn, fd, dw, df, num, uf) {
+      matched = true;
+      if (mw !== undefined) total += parseInt(mw, 10) + parseInt(mn, 10) / parseInt(md, 10);
+      else if (fn !== undefined) total += parseInt(fn, 10) / parseInt(fd, 10);
+      else if (dw !== undefined) total += parseFloat(dw) + UNI_FRAC[df];
+      else if (num !== undefined) total += parseFloat(num);
+      else total += UNI_FRAC[uf];
+      return m;
+    });
+    return matched ? total : null;
+  }
+
+  // ---- Metric conversion ------------------------------------------------------
+  var QTY_PART = "(?:\\d+\\s+\\d+\\s*\\/\\s*\\d+|\\d+\\s*\\/\\s*\\d+|\\d+(?:\\.\\d+)?\\s*[½⅓⅔¼¾⅛⅜⅝⅞]?|[½⅓⅔¼¾⅛⅜⅝⅞])";
+  function roundTo(n, step) { return Math.round(n / step) * step; }
+
+  function toMetric(line) {
+    var out = line;
+    // fluid ounces → ml (before plain oz)
+    out = out.replace(new RegExp("(" + QTY_PART + ")\\s*(?:fl\\.?\\s*oz|fluid\\s+ounces?)\\b", "gi"), function (m, q) {
+      var v = parseQtyToken(q); return v == null ? m : roundTo(v * 29.57, 5) + " ml";
+    });
+    // cups → ml
+    out = out.replace(new RegExp("(" + QTY_PART + ")\\s*cups?\\b", "gi"), function (m, q) {
+      var v = parseQtyToken(q); return v == null ? m : roundTo(v * 240, 5) + " ml";
+    });
+    // ounces → g
+    out = out.replace(new RegExp("(" + QTY_PART + ")\\s*(?:oz|ounces?)\\b", "gi"), function (m, q) {
+      var v = parseQtyToken(q); return v == null ? m : roundTo(v * 28.35, 5) + " g";
+    });
+    // pounds → g / kg
+    out = out.replace(new RegExp("(" + QTY_PART + ")\\s*(?:lbs?|pounds?)\\b", "gi"), function (m, q) {
+      var v = parseQtyToken(q);
+      if (v == null) return m;
+      var g = v * 453.6;
+      return g >= 1000 ? (Math.round(g / 100) / 10) + " kg" : roundTo(g, 10) + " g";
+    });
+    return out;
+  }
+
+  function convertTemps(text) {
+    if (unitMode !== "metric") return text;
+    return text.replace(/(\d{2,3})\s*(?:°\s*F\b|degrees?\s+F(?:ahrenheit)?\b)/gi, function (m, f) {
+      var c = Math.round(((parseInt(f, 10) - 32) * 5 / 9) / 5) * 5;
+      return c + "°C";
+    });
+  }
+
+  function prepIngredient(line, factor) {
+    var t = scaleLine(line, factor);
+    if (unitMode === "metric") t = toMetric(t);
+    return t;
+  }
+
+  // ---- Inline timers -------------------------------------------------------------
+  var TIMER_RE = /(\d+)(?:\s*[–—-]\s*(\d+))?\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\b/gi;
+
+  function timerify(text) {
+    return text.replace(TIMER_RE, function (m, a, b, unit) {
+      var n = b ? Math.max(parseInt(a, 10), parseInt(b, 10)) : parseInt(a, 10);
+      var u = unit.toLowerCase();
+      var secs = /^h/.test(u) ? n * 3600 : /^m/.test(u) ? n * 60 : n;
+      return '<button type="button" class="step-timer" data-secs="' + secs + '" data-label="' + m.replace(/"/g, "&quot;") + '">⏱ ' + m + "</button>";
+    });
+  }
+
+  var timersEl = document.getElementById("timers");
+  function fmtClock(s) {
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    function pad(x) { return (x < 10 ? "0" : "") + x; }
+    return (h ? h + ":" + pad(m) : m) + ":" + pad(sec);
+  }
+  function beep() {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      var ctx = new Ctx();
+      [0, 0.35, 0.7].forEach(function (t) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = "sine"; o.frequency.value = 880;
+        o.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.001, ctx.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.28);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.3);
+      });
+    } catch (e) {}
+  }
+  function startTimer(secs, label) {
+    var chip = document.createElement("div");
+    chip.className = "timer-chip";
+    chip.innerHTML = '<span class="t-label">⏱ ' + label + '</span><span class="t-count"></span><button type="button" aria-label="Dismiss timer">✕</button>';
+    var countEl2 = chip.querySelector(".t-count");
+    var remaining = secs;
+    countEl2.textContent = fmtClock(remaining);
+    var iv = setInterval(function () {
+      remaining--;
+      if (remaining <= 0) {
+        clearInterval(iv);
+        countEl2.textContent = "Done!";
+        chip.classList.add("finished");
+        beep();
+        if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+      } else {
+        countEl2.textContent = fmtClock(remaining);
+      }
+    }, 1000);
+    chip.querySelector("button").addEventListener("click", function () {
+      clearInterval(iv);
+      chip.remove();
+    });
+    timersEl.appendChild(chip);
+    showToast("Timer started — " + label);
+  }
+  // Delegated: any .step-timer click anywhere starts a timer
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest ? e.target.closest(".step-timer") : null;
+    if (btn) {
+      e.stopPropagation();
+      startTimer(parseInt(btn.getAttribute("data-secs"), 10), btn.getAttribute("data-label"));
+    }
+  });
+
   // ---- State ------------------------------------------------------------
   var active = { category: [], time: [], difficulty: [], flavor: [] };
   var query = "";
+  var favOnly = false;
 
   // ---- Render filters ----------------------------------------------------
   var filtersEl = document.getElementById("filters");
@@ -377,10 +919,13 @@
 
     var clear = document.createElement("button");
     clear.id = "clear-filters";
+    clear.type = "button";
     clear.textContent = "Clear all filters";
     clear.addEventListener("click", function () {
       active = { category: [], time: [], difficulty: [], flavor: [] };
       query = "";
+      favOnly = false;
+      document.getElementById("fav-toggle").classList.remove("on");
       document.getElementById("search").value = "";
       filtersEl.querySelectorAll(".chip.on").forEach(function (c) { c.classList.remove("on"); });
       update();
@@ -389,9 +934,10 @@
   }
 
   // ---- Filtering logic ---------------------------------------------------
-  // Within a group: OR (any selected value matches).
-  // Across groups: AND (recipe must satisfy every group with a selection).
+  // Within a group: OR. Across groups: AND.
+  // Search: every space/comma-separated term must match (fridge search).
   function matches(r) {
+    if (favOnly && !isFav(r.id)) return false;
     if (active.category.length && active.category.indexOf(r.category) === -1) return false;
     if (active.time.length && active.time.indexOf(r.time) === -1) return false;
     if (active.difficulty.length && active.difficulty.indexOf(r.difficulty) === -1) return false;
@@ -401,10 +947,39 @@
       if (!any) return false;
     }
     if (query) {
-      var hay = (r.title + " " + (r.ingredients || []).join(" ") + " " + r.category + " " + (r.flavors || []).join(" ")).toLowerCase();
-      if (hay.indexOf(query) === -1) return false;
+      var hay = (r.title + " " + (r.ingredients || []).join(" ") + " " + (r.steps || []).join(" ") + " " + r.category + " " + (r.flavors || []).join(" ") + " " + (r.notes || "")).toLowerCase();
+      var terms = query.split(/[\s,]+/).filter(Boolean);
+      for (var i = 0; i < terms.length; i++) {
+        if (hay.indexOf(terms[i]) === -1) return false;
+      }
     }
     return true;
+  }
+
+  // ---- Sorting -------------------------------------------------------------
+  function dateVal(r) {
+    if (!r.dateAdded) return 0;
+    var t = Date.parse(r.dateAdded);
+    return isNaN(t) ? 0 : t;
+  }
+  function sorted(list) {
+    var copy = list.slice();
+    if (sortMode === "az") {
+      copy.sort(function (a, b) { return a.title.localeCompare(b.title); });
+    } else if (sortMode === "quick") {
+      copy.sort(function (a, b) {
+        return (TIME_ORDER.indexOf(a.time) - TIME_ORDER.indexOf(b.time)) || a.title.localeCompare(b.title);
+      });
+    } else { // newest
+      copy.sort(function (a, b) {
+        return (dateVal(b) - dateVal(a)) || (RECIPES.indexOf(b) - RECIPES.indexOf(a));
+      });
+    }
+    return copy;
+  }
+  function isNew(r) {
+    var t = dateVal(r);
+    return t && (Date.now() - t) < 14 * 24 * 3600 * 1000;
   }
 
   // ---- Render cards --------------------------------------------------------
@@ -423,7 +998,10 @@
       return;
     }
     if (!list.length) {
-      grid.innerHTML = '<div class="empty"><div class="emoji">🔍</div><h2>Nothing matches</h2><p>Try removing a filter or two.</p></div>';
+      var msg = favOnly && !favs.length
+        ? '<div class="empty"><div class="emoji">♥</div><h2>No favourites yet</h2><p>Tap the heart on any recipe to save it here.</p></div>'
+        : '<div class="empty"><div class="emoji">🔍</div><h2>Nothing matches</h2><p>Try removing a filter or two.</p></div>';
+      grid.innerHTML = msg;
       countEl.textContent = "0 of " + RECIPES.length + " recipes";
       return;
     }
@@ -434,12 +1012,19 @@
       var imgHtml = r.image
         ? '<img class="card-img" src="' + r.image + '" alt="" loading="lazy" onerror="this.outerHTML=\'<div class=card-img-placeholder>' + (CATEGORY_EMOJI[r.category] || "🍽️") + '</div>\'">'
         : '<div class="card-img-placeholder">' + (CATEGORY_EMOJI[r.category] || "🍽️") + "</div>";
+      var badge = isNew(r) ? '<span class="new-badge">New</span>' : "";
+      var favBtn = '<button type="button" class="fav-btn' + (isFav(r.id) ? " on" : "") + '" aria-label="Favourite">' + (isFav(r.id) ? "♥" : "♡") + "</button>";
       var tags = "";
       if (r.category) tags += tagSpan("tag-category", cap(r.category));
       if (r.time) tags += tagSpan("tag-time", TIME_LABELS[r.time] ? TIME_LABELS[r.time].split(" · ")[0] : cap(r.time));
       if (r.difficulty) tags += tagSpan("tag-difficulty", DIFF_LABELS[r.difficulty] || cap(r.difficulty));
       (r.flavors || []).forEach(function (f) { tags += tagSpan("tag-flavor", cap(f)); });
-      card.innerHTML = imgHtml + '<div class="card-body"><div class="card-title">' + r.title + '</div><div class="card-tags">' + tags + "</div></div>";
+      card.innerHTML = '<div class="card-img-wrap">' + imgHtml + badge + favBtn + '</div><div class="card-body"><div class="card-title">' + r.title + '</div><div class="card-tags">' + tags + "</div></div>";
+      card.querySelector(".fav-btn").addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleFav(r.id);
+        update();
+      });
       card.addEventListener("click", function () { openModal(r); });
       grid.appendChild(card);
     });
@@ -448,9 +1033,20 @@
   // ---- Modal -----------------------------------------------------------------
   var overlay = document.getElementById("modal-overlay");
   var modal = document.getElementById("modal");
+  var currentId = null;
+  var curScale = 1;
+  var SCALES = [[0.5, "×½"], [1, "×1"], [1.5, "×1½"], [2, "×2"], [3, "×3"]];
 
-  function openModal(r) {
-    var html = '<button class="modal-close" aria-label="Close">✕</button>';
+  function fmtDate(d) {
+    var t = Date.parse(d);
+    if (isNaN(t)) return d;
+    return new Date(t).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  }
+
+  function openModal(r, fromHash) {
+    currentId = r.id;
+    curScale = 1;
+    var html = '<button class="modal-close" type="button" aria-label="Close">✕</button>';
     if (r.image) html += '<img class="modal-img" src="' + r.image + '" alt="">';
     html += '<div class="modal-body"><div class="modal-title">' + r.title + "</div>";
     var tags = "";
@@ -459,26 +1055,436 @@
     if (r.difficulty) tags += tagSpan("tag-difficulty", DIFF_LABELS[r.difficulty] || cap(r.difficulty));
     (r.flavors || []).forEach(function (f) { tags += tagSpan("tag-flavor", cap(f)); });
     html += '<div class="modal-tags">' + tags + "</div>";
+
+    // Action row
+    html += '<div class="action-row">';
+    html += '<button type="button" class="abtn primary" id="m-cook">▶ Cook mode</button>';
+    html += '<button type="button" class="abtn" id="m-fav"></button>';
+    html += '<button type="button" class="abtn" id="m-cart"></button>';
+    html += '<button type="button" class="abtn" id="m-share">↗ Share</button>';
+    html += '<button type="button" class="abtn" id="m-print">🖨 Print</button>';
+    html += "</div>";
+
+    // Scale + units row
     if (r.ingredients && r.ingredients.length) {
-      html += "<h3>Ingredients</h3><ul>" + r.ingredients.map(function (i) { return "<li>" + i + "</li>"; }).join("") + "</ul>";
+      html += '<div class="scale-row">';
+      html += '<span class="seg-label">Scale</span><span class="seg" id="m-scale">';
+      SCALES.forEach(function (s) {
+        html += '<button type="button" data-f="' + s[0] + '"' + (s[0] === 1 ? ' class="on"' : "") + ">" + s[1] + "</button>";
+      });
+      html += "</span>";
+      html += '<span class="seg-label">Units</span><span class="seg" id="m-units">';
+      html += '<button type="button" data-u="orig"' + (unitMode === "orig" ? ' class="on"' : "") + ">Original</button>";
+      html += '<button type="button" data-u="metric"' + (unitMode === "metric" ? ' class="on"' : "") + ">Metric</button>";
+      html += "</span>";
+      html += '<span class="serves-note" id="m-serves"></span>';
+      html += "</div>";
+    }
+
+    if (r.ingredients && r.ingredients.length) {
+      html += '<h3>Ingredients <button type="button" class="reset-checks" id="m-reset" style="display:none">reset ticks</button></h3><ul id="m-ings"></ul>';
     }
     if (r.steps && r.steps.length) {
-      html += "<h3>Steps</h3><ol>" + r.steps.map(function (s) { return "<li>" + s + "</li>"; }).join("") + "</ol>";
+      html += '<h3>Steps</h3><ol id="m-steps"></ol>';
     }
     if (r.notes) html += '<p class="notes">' + r.notes + "</p>";
+    if (r.videoUrl) html += '<a class="source-link" href="' + r.videoUrl + '" target="_blank" rel="noopener">▶ Watch video ↗</a>';
     if (r.source) html += '<a class="source-link" href="' + r.source + '" target="_blank" rel="noopener">View original post ↗</a>';
+    if (r.dateAdded) html += '<div class="date-added">Added ' + fmtDate(r.dateAdded) + "</div>";
     html += "</div>";
     modal.innerHTML = html;
+
     modal.querySelector(".modal-close").addEventListener("click", closeModal);
+    modal.querySelector("#m-cook").addEventListener("click", function () { openCook(r); });
+    modal.querySelector("#m-share").addEventListener("click", function () { shareRecipe(r); });
+    modal.querySelector("#m-print").addEventListener("click", function () { window.print(); });
+
+    var favB = modal.querySelector("#m-fav");
+    function paintFav() {
+      favB.textContent = isFav(r.id) ? "♥ Favourited" : "♡ Favourite";
+      favB.classList.toggle("fav-on", isFav(r.id));
+    }
+    paintFav();
+    favB.addEventListener("click", function () { toggleFav(r.id); paintFav(); update(); });
+
+    var cartB = modal.querySelector("#m-cart");
+    function paintCart() {
+      var inCart = cart.indexOf(r.id) !== -1;
+      cartB.textContent = inCart ? "✓ On shopping list" : "🛒 Add to list";
+      cartB.classList.toggle("on", inCart);
+    }
+    paintCart();
+    cartB.addEventListener("click", function () {
+      var i = cart.indexOf(r.id);
+      if (i === -1) { cart.push(r.id); showToast("Added to shopping list"); }
+      else { cart.splice(i, 1); showToast("Removed from shopping list"); }
+      lsSet("ir-cart", cart);
+      paintCart();
+      updateFab();
+    });
+
+    var scaleSeg = modal.querySelector("#m-scale");
+    if (scaleSeg) {
+      scaleSeg.querySelectorAll("button").forEach(function (b) {
+        b.addEventListener("click", function () {
+          curScale = parseFloat(b.getAttribute("data-f"));
+          scaleSeg.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
+          renderModalLists(r);
+        });
+      });
+    }
+    var unitSeg = modal.querySelector("#m-units");
+    if (unitSeg) {
+      unitSeg.querySelectorAll("button").forEach(function (b) {
+        b.addEventListener("click", function () {
+          unitMode = b.getAttribute("data-u");
+          lsSet("ir-units", unitMode);
+          unitSeg.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
+          renderModalLists(r);
+        });
+      });
+    }
+    var resetB = modal.querySelector("#m-reset");
+    if (resetB) {
+      resetB.addEventListener("click", function (e) {
+        e.stopPropagation();
+        checks[r.id] = { i: [], s: [] };
+        lsSet("ir-checks", checks);
+        renderModalLists(r);
+      });
+    }
+
+    renderModalLists(r);
     overlay.classList.add("open");
     document.body.style.overflow = "hidden";
+    if (!fromHash) history.replaceState(null, "", "#" + encodeURIComponent(r.id));
   }
+
+  function renderModalLists(r) {
+    var c = getChecks(r.id);
+    var servesEl = modal.querySelector("#m-serves");
+    if (servesEl) {
+      servesEl.textContent = r.servings ? "Serves ~" + fmtQty(r.servings * curScale) : (curScale !== 1 ? "quantities ×" + fmtQty(curScale) : "");
+    }
+    var ingEl = modal.querySelector("#m-ings");
+    if (ingEl) {
+      ingEl.innerHTML = (r.ingredients || []).map(function (line, i) {
+        return '<li data-i="' + i + '"' + (c.i.indexOf(i) !== -1 ? ' class="done"' : "") + ">" + prepIngredient(line, curScale) + "</li>";
+      }).join("");
+      ingEl.querySelectorAll("li").forEach(function (li) {
+        li.addEventListener("click", function () {
+          var i = parseInt(li.getAttribute("data-i"), 10);
+          var on = li.classList.toggle("done");
+          setCheck(r.id, "i", i, on);
+          paintReset(r);
+        });
+      });
+    }
+    var stepEl = modal.querySelector("#m-steps");
+    if (stepEl) {
+      stepEl.innerHTML = (r.steps || []).map(function (s, i) {
+        return '<li data-i="' + i + '"' + (c.s.indexOf(i) !== -1 ? ' class="done"' : "") + ">" + timerify(convertTemps(s)) + "</li>";
+      }).join("");
+      stepEl.querySelectorAll("li").forEach(function (li) {
+        li.addEventListener("click", function (e) {
+          if (e.target.closest && e.target.closest(".step-timer")) return;
+          var i = parseInt(li.getAttribute("data-i"), 10);
+          var on = li.classList.toggle("done");
+          setCheck(r.id, "s", i, on);
+          paintReset(r);
+        });
+      });
+    }
+    paintReset(r);
+  }
+  function paintReset(r) {
+    var resetB = modal.querySelector("#m-reset");
+    if (!resetB) return;
+    var c = getChecks(r.id);
+    resetB.style.display = (c.i.length || c.s.length) ? "inline" : "none";
+  }
+
   function closeModal() {
     overlay.classList.remove("open");
     document.body.style.overflow = "";
+    currentId = null;
+    if (location.hash) history.replaceState(null, "", location.pathname + location.search);
   }
   overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+
+  // ---- Deep links ---------------------------------------------------------------
+  function syncFromHash() {
+    var id = decodeURIComponent(location.hash.replace(/^#/, ""));
+    if (id && byId[id]) {
+      if (currentId !== id) openModal(byId[id], true);
+    } else if (currentId) {
+      closeModal();
+    }
+  }
+  window.addEventListener("hashchange", syncFromHash);
+
+  function shareRecipe(r) {
+    var url = location.origin + location.pathname + "#" + encodeURIComponent(r.id);
+    if (navigator.share) {
+      navigator.share({ title: r.title + " — Isaac's Recipes", url: url }).catch(function () {});
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () { showToast("Link copied"); }, function () { showToast(url); });
+    } else {
+      showToast(url);
+    }
+  }
+
+  // ---- Cook mode ------------------------------------------------------------------
+  var cookOv = document.getElementById("cook-overlay");
+  var cookOpen = false;
+  var cookIdx = 0;
+  var cookRecipe = null;
+  var wakeLock = null;
+
+  function lockScreen() {
+    if (!("wakeLock" in navigator)) {
+      document.getElementById("wake-note").textContent = "";
+      return;
+    }
+    navigator.wakeLock.request("screen").then(function (wl) {
+      wakeLock = wl;
+      document.getElementById("wake-note").textContent = "🔆 Screen will stay awake while you cook";
+      wl.addEventListener("release", function () {
+        if (!cookOpen) document.getElementById("wake-note").textContent = "";
+      });
+    }).catch(function () {});
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (cookOpen && document.visibilityState === "visible") lockScreen();
+  });
+
+  function openCook(r) {
+    cookRecipe = r;
+    cookOpen = true;
+    var c = getChecks(r.id);
+    cookIdx = 0;
+    for (var i = 0; i < (r.steps || []).length; i++) {
+      if (c.s.indexOf(i) === -1) { cookIdx = i; break; }
+    }
+    document.getElementById("cook-title").textContent = r.title;
+    renderCook();
+    renderCookIngredients();
+    document.getElementById("cook-drawer").classList.remove("open");
+    cookOv.classList.add("open");
+    lockScreen();
+  }
+  function renderCook() {
+    var steps = cookRecipe.steps || [];
+    var total = steps.length;
+    document.getElementById("cook-progress").textContent = "Step " + (cookIdx + 1) + " of " + total;
+    document.getElementById("cook-fill").style.width = (total ? ((cookIdx + 1) / total) * 100 : 0) + "%";
+    document.getElementById("cook-step").innerHTML = timerify(convertTemps(steps[cookIdx] || ""));
+    document.getElementById("cook-prev").disabled = cookIdx === 0;
+    document.getElementById("cook-next").textContent = cookIdx >= total - 1 ? "Finish ✓" : "Next →";
+  }
+  function renderCookIngredients() {
+    var c = getChecks(cookRecipe.id);
+    var ul = document.getElementById("cook-ing-list");
+    ul.innerHTML = (cookRecipe.ingredients || []).map(function (line, i) {
+      return '<li data-i="' + i + '"' + (c.i.indexOf(i) !== -1 ? ' class="done"' : "") + ">" + prepIngredient(line, curScale) + "</li>";
+    }).join("");
+    ul.querySelectorAll("li").forEach(function (li) {
+      li.addEventListener("click", function () {
+        var i = parseInt(li.getAttribute("data-i"), 10);
+        var on = li.classList.toggle("done");
+        setCheck(cookRecipe.id, "i", i, on);
+      });
+    });
+  }
+  function closeCook() {
+    cookOpen = false;
+    cookOv.classList.remove("open");
+    if (wakeLock) { wakeLock.release().catch(function () {}); wakeLock = null; }
+    if (currentId) renderModalLists(cookRecipe); // refresh ticks in the modal underneath
+  }
+  document.getElementById("cook-exit").addEventListener("click", closeCook);
+  document.getElementById("cook-ing-btn").addEventListener("click", function () {
+    renderCookIngredients();
+    document.getElementById("cook-drawer").classList.toggle("open");
+  });
+  document.getElementById("cook-prev").addEventListener("click", function () {
+    if (cookIdx > 0) { cookIdx--; renderCook(); }
+  });
+  document.getElementById("cook-next").addEventListener("click", function () {
+    var total = (cookRecipe.steps || []).length;
+    setCheck(cookRecipe.id, "s", cookIdx, true);
+    if (cookIdx >= total - 1) {
+      closeCook();
+      showToast("All done — enjoy! 🍽️");
+    } else {
+      cookIdx++;
+      renderCook();
+    }
+  });
+  // swipe navigation
+  (function () {
+    var x0 = null;
+    cookOv.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    cookOv.addEventListener("touchend", function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0;
+      x0 = null;
+      if (Math.abs(dx) < 60) return;
+      if (dx < 0) document.getElementById("cook-next").click();
+      else document.getElementById("cook-prev").click();
+    }, { passive: true });
+  })();
+
+  // ---- Shopping list -----------------------------------------------------------------
+  var fab = document.getElementById("cart-fab");
+  var shopOverlay = document.getElementById("shop-overlay");
+  var shopModal = document.getElementById("shop-modal");
+
+  function updateFab() {
+    document.getElementById("cart-count").textContent = cart.length;
+    fab.classList.toggle("visible", cart.length > 0);
+  }
+  fab.addEventListener("click", openShop);
+
+  function buildShopping() {
+    var map = {}, order = [];
+    cart.forEach(function (id) {
+      var r = byId[id];
+      if (!r) return;
+      (r.ingredients || []).forEach(function (line) {
+        var key = line.trim().toLowerCase();
+        if (!map[key]) { map[key] = { text: line.trim(), count: 0 }; order.push(key); }
+        map[key].count++;
+      });
+    });
+    return { map: map, order: order };
+  }
+
+  function shoppingText() {
+    var b = buildShopping();
+    var names = cart.map(function (id) { return byId[id] ? byId[id].title : id; });
+    var lines = ["Shopping list — Isaac's Recipes", "(" + names.join(", ") + ")", ""];
+    b.order.forEach(function (k) {
+      var it = b.map[k];
+      lines.push("• " + it.text + (it.count > 1 ? "  ×" + it.count : ""));
+    });
+    return lines.join("\n");
+  }
+
+  function openShop() {
+    var html = '<button class="modal-close" type="button" aria-label="Close">✕</button>';
+    html += '<div class="modal-body"><div class="modal-title">🛒 Shopping list</div>';
+    if (!cart.length) {
+      html += '<p class="shop-empty">Nothing here yet. Open a recipe and tap “Add to list”.</p></div>';
+    } else {
+      html += '<div class="shop-recipes">';
+      cart.forEach(function (id) {
+        var r = byId[id];
+        if (!r) return;
+        html += '<span class="shop-recipe-chip">' + r.title + ' <button type="button" data-rm="' + id + '" aria-label="Remove">✕</button></span>';
+      });
+      html += "</div>";
+      html += '<h3>Everything you need</h3><ul class="shop-list" id="shop-items"></ul>';
+      html += '<div class="shop-actions">';
+      html += '<button type="button" class="abtn primary" id="shop-copy">📋 Copy list</button>';
+      if (navigator.share) html += '<button type="button" class="abtn" id="shop-share">↗ Share</button>';
+      html += '<button type="button" class="abtn" id="shop-clear">Clear list</button>';
+      html += "</div></div>";
+    }
+    shopModal.innerHTML = html;
+    shopModal.querySelector(".modal-close").addEventListener("click", closeShop);
+
+    if (cart.length) {
+      // remove-recipe chips
+      shopModal.querySelectorAll("[data-rm]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var i = cart.indexOf(b.getAttribute("data-rm"));
+          if (i !== -1) cart.splice(i, 1);
+          lsSet("ir-cart", cart);
+          updateFab();
+          openShop();
+        });
+      });
+      var b = buildShopping();
+      // prune stale shop checks
+      Object.keys(shopChecks).forEach(function (k) { if (!b.map[k]) delete shopChecks[k]; });
+      var ul = shopModal.querySelector("#shop-items");
+      ul.innerHTML = b.order.map(function (k) {
+        var it = b.map[k];
+        var done = !!shopChecks[k];
+        return '<li data-k="' + k.replace(/"/g, "&quot;") + '"' + (done ? ' class="done"' : "") + '><input type="checkbox"' + (done ? " checked" : "") + "><span>" + it.text + (it.count > 1 ? ' <span class="x-count">×' + it.count + "</span>" : "") + "</span></li>";
+      }).join("");
+      ul.querySelectorAll("li").forEach(function (li) {
+        li.addEventListener("click", function (e) {
+          var k = li.getAttribute("data-k");
+          var box = li.querySelector("input");
+          if (e.target !== box) box.checked = !box.checked;
+          li.classList.toggle("done", box.checked);
+          if (box.checked) shopChecks[k] = true; else delete shopChecks[k];
+          lsSet("ir-shopchk", shopChecks);
+        });
+      });
+      shopModal.querySelector("#shop-copy").addEventListener("click", function () {
+        var t = shoppingText();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(t).then(function () { showToast("List copied — paste it anywhere"); }, function () { showToast("Couldn't copy"); });
+        }
+      });
+      var shareB = shopModal.querySelector("#shop-share");
+      if (shareB) shareB.addEventListener("click", function () {
+        navigator.share({ title: "Shopping list", text: shoppingText() }).catch(function () {});
+      });
+      shopModal.querySelector("#shop-clear").addEventListener("click", function () {
+        cart = [];
+        lsSet("ir-cart", cart);
+        shopChecks = {};
+        lsSet("ir-shopchk", shopChecks);
+        updateFab();
+        openShop();
+      });
+    }
+    shopOverlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeShop() {
+    shopOverlay.classList.remove("open");
+    if (!overlay.classList.contains("open")) document.body.style.overflow = "";
+  }
+  shopOverlay.addEventListener("click", function (e) { if (e.target === shopOverlay) closeShop(); });
+
+  // ---- Keyboard --------------------------------------------------------------------
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      if (cookOpen) closeCook();
+      else if (shopOverlay.classList.contains("open")) closeShop();
+      else closeModal();
+    }
+    if (cookOpen) {
+      if (e.key === "ArrowRight") document.getElementById("cook-next").click();
+      if (e.key === "ArrowLeft") document.getElementById("cook-prev").click();
+    }
+  });
+
+  // ---- Toolbar ----------------------------------------------------------------------
+  var sortSel = document.getElementById("sort");
+  sortSel.value = sortMode;
+  sortSel.addEventListener("change", function () {
+    sortMode = sortSel.value;
+    lsSet("ir-sort", sortMode);
+    update();
+  });
+  document.getElementById("fav-toggle").addEventListener("click", function () {
+    favOnly = !favOnly;
+    this.classList.toggle("on", favOnly);
+    update();
+  });
+  document.getElementById("surprise").addEventListener("click", function () {
+    var pool = RECIPES.filter(matches);
+    if (!pool.length) pool = RECIPES;
+    if (!pool.length) return;
+    var r = pool[Math.floor(Math.random() * pool.length)];
+    openModal(r);
+  });
 
   // ---- Search ---------------------------------------------------------------
   document.getElementById("search").addEventListener("input", function (e) {
@@ -488,14 +1494,24 @@
 
   // ---- Update loop ------------------------------------------------------------
   function update() {
-    var anyFilter = query || active.category.length || active.time.length || active.difficulty.length || active.flavor.length;
+    var anyFilter = query || favOnly || active.category.length || active.time.length || active.difficulty.length || active.flavor.length;
     var clear = document.getElementById("clear-filters");
     if (clear) clear.classList.toggle("visible", !!anyFilter);
-    renderCards(RECIPES.filter(matches));
+    renderCards(sorted(RECIPES.filter(matches)));
   }
 
+  // ---- Service worker (offline / installable) -----------------------------------
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
+
+  // ---- Init -----------------------------------------------------------------------
   renderFilters();
+  updateFab();
   update();
+  syncFromHash();
 })();
 </script>
 </body>

@@ -8,6 +8,7 @@
 //   title: "Recipe Name",
 //   image: "https://...",               // optional photo URL
 //   source: "https://instagram.com/p/", // optional original post link
+//   videoUrl: "https://...",            // optional — link to the reel/video
 //   category: "sauce",                  // one: sauce, meat, vegetable, seafood,
 //                                       //   pasta, soup, salad, dessert, bread,
 //                                       //   breakfast, side, main, drink
@@ -15,6 +16,8 @@
 //   difficulty: "easy",                 // easy | medium | hard
 //   flavors: ["spicy", "sweet"],        // any of: spicy, sweet, savoury, sour,
 //                                       //   smoky, fresh, rich, tangy, herby, garlicky
+//   servings: 4,                        // optional — base servings, shown by the scaler
+//   dateAdded: "2026-07-10",            // YYYY-MM-DD — powers "Newest first" + NEW badge
 //   ingredients: ["1 cup ..."],
 //   steps: ["Do this first.", "Then this."],
 //   notes: ""                           // optional
@@ -31,6 +34,7 @@ window.RECIPES = [
     time: "quick",
     difficulty: "easy",
     flavors: ["fresh", "herby", "spicy", "tangy"],
+    dateAdded: "2026-07-10",
     ingredients: [
       "1/3 cup mayonnaise",
       "1/3 cup Greek yogurt",
@@ -64,6 +68,7 @@ window.RECIPES = [
     time: "quick",
     difficulty: "easy",
     flavors: ["garlicky", "savoury", "rich"],
+    dateAdded: "2026-07-10",
     ingredients: [
       "1/2 cup Greek yogurt",
       "2 tbsp Parmesan cheese",
@@ -91,6 +96,7 @@ window.RECIPES = [
     time: "quick",
     difficulty: "easy",
     flavors: ["smoky", "spicy"],
+    dateAdded: "2026-07-10",
     ingredients: [
       "1/2 cup Greek yogurt",
       "1 tsp chipotle powder",
@@ -118,6 +124,7 @@ window.RECIPES = [
     time: "quick",
     difficulty: "easy",
     flavors: ["spicy", "savoury", "rich"],
+    dateAdded: "2026-07-10",
     ingredients: [
       "1/2 cup Greek yogurt",
       "1 tsp Cajun seasoning",
@@ -145,6 +152,7 @@ window.RECIPES = [
     time: "quick",
     difficulty: "easy",
     flavors: ["sweet", "smoky"],
+    dateAdded: "2026-07-10",
     ingredients: [
       "1/2 cup Greek yogurt",
       "1/2 cup roasted red peppers (jarred work great)",
@@ -172,6 +180,7 @@ window.RECIPES = [
     time: "quick",
     difficulty: "easy",
     flavors: ["spicy", "garlicky", "tangy"],
+    dateAdded: "2026-07-10",
     ingredients: [
       "1/2 cup Greek yogurt",
       "1 tsp peri peri seasoning",
@@ -199,6 +208,7 @@ window.RECIPES = [
     time: "quick",
     difficulty: "easy",
     flavors: ["spicy", "tangy"],
+    dateAdded: "2026-07-10",
     ingredients: [
       "1/4 cup Greek yogurt",
       "1 tbsp hot sauce",
@@ -226,6 +236,7 @@ window.RECIPES = [
     time: "quick",
     difficulty: "easy",
     flavors: ["fresh", "herby", "tangy"],
+    dateAdded: "2026-07-10",
     ingredients: [
       "1/4 cup Greek yogurt",
       "1 tbsp fresh dill, chopped",
