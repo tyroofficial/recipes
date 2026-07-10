@@ -18,6 +18,9 @@
 //                                       //   smoky, fresh, rich, tangy, herby, garlicky
 //   servings: 4,                        // optional — base servings, shown by the scaler
 //   dateAdded: "2026-07-10",            // YYYY-MM-DD — powers "Newest first" + NEW badge
+//   pantry: ["greek yogurt", "lemon"],  // canonical item names (lowercase, no quantities,
+//                                       //   no prep words) — powers the My Fridge feature.
+//                                       //   One entry per distinct item; skip water.
 //   ingredients: ["1 cup ..."],
 //   steps: ["Do this first.", "Then this."],
 //   notes: ""                           // optional
@@ -35,6 +38,7 @@ window.RECIPES = [
     difficulty: "easy",
     flavors: ["fresh", "herby", "spicy", "tangy"],
     dateAdded: "2026-07-10",
+    pantry: ["mayonnaise", "greek yogurt", "cilantro", "basil", "mint", "jalapeños", "ají amarillo paste", "lime", "white wine vinegar", "honey", "dijon mustard", "olive oil", "salt"],
     ingredients: [
       "1/3 cup mayonnaise",
       "1/3 cup Greek yogurt",
@@ -69,6 +73,7 @@ window.RECIPES = [
     difficulty: "easy",
     flavors: ["garlicky", "savoury", "rich"],
     dateAdded: "2026-07-10",
+    pantry: ["greek yogurt", "parmesan cheese", "garlic", "garlic powder", "black pepper", "lemon", "salt"],
     ingredients: [
       "1/2 cup Greek yogurt",
       "2 tbsp Parmesan cheese",
@@ -97,6 +102,7 @@ window.RECIPES = [
     difficulty: "easy",
     flavors: ["smoky", "spicy"],
     dateAdded: "2026-07-10",
+    pantry: ["greek yogurt", "chipotle powder", "paprika", "garlic powder", "honey", "lemon", "salt"],
     ingredients: [
       "1/2 cup Greek yogurt",
       "1 tsp chipotle powder",
@@ -125,6 +131,7 @@ window.RECIPES = [
     difficulty: "easy",
     flavors: ["spicy", "savoury", "rich"],
     dateAdded: "2026-07-10",
+    pantry: ["greek yogurt", "cajun seasoning", "garlic powder", "onion powder", "honey", "lemon", "salt"],
     ingredients: [
       "1/2 cup Greek yogurt",
       "1 tsp Cajun seasoning",
@@ -153,6 +160,7 @@ window.RECIPES = [
     difficulty: "easy",
     flavors: ["sweet", "smoky"],
     dateAdded: "2026-07-10",
+    pantry: ["greek yogurt", "roasted red peppers", "garlic powder", "paprika", "olive oil", "lemon", "salt"],
     ingredients: [
       "1/2 cup Greek yogurt",
       "1/2 cup roasted red peppers (jarred work great)",
@@ -181,6 +189,7 @@ window.RECIPES = [
     difficulty: "easy",
     flavors: ["spicy", "garlicky", "tangy"],
     dateAdded: "2026-07-10",
+    pantry: ["greek yogurt", "peri peri seasoning", "garlic", "paprika", "honey", "lemon", "salt"],
     ingredients: [
       "1/2 cup Greek yogurt",
       "1 tsp peri peri seasoning",
@@ -209,6 +218,7 @@ window.RECIPES = [
     difficulty: "easy",
     flavors: ["spicy", "tangy"],
     dateAdded: "2026-07-10",
+    pantry: ["greek yogurt", "hot sauce", "garlic powder", "paprika", "honey", "lemon", "salt"],
     ingredients: [
       "1/4 cup Greek yogurt",
       "1 tbsp hot sauce",
@@ -237,6 +247,7 @@ window.RECIPES = [
     difficulty: "easy",
     flavors: ["fresh", "herby", "tangy"],
     dateAdded: "2026-07-10",
+    pantry: ["greek yogurt", "fresh dill", "garlic powder", "black pepper", "lemon", "salt"],
     ingredients: [
       "1/4 cup Greek yogurt",
       "1 tbsp fresh dill, chopped",
