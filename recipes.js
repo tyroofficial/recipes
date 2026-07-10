@@ -24,7 +24,7 @@
 window.RECIPES = [
   {
     id: "everything-sauce",
-    title: "Everything Sauce",
+    title: "Jalapeño Lime Sauce",
     image: "images/everything-sauce.jpg",
     source: "https://www.instagram.com/reel/DZISw_yNLQq/",
     category: "sauce",
