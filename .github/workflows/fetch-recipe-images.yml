@@ -1,0 +1,51 @@
+# One-shot workflow: downloads the 7 sauce images into images/, commits them,
+# and deletes itself. Paste this into GitHub as
+# .github/workflows/fetch-recipe-images.yml
+name: Fetch recipe images (one-shot)
+
+on:
+  push:
+    paths:
+      - .github/workflows/fetch-recipe-images.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download images
+        run: |
+          set -euo pipefail
+          mkdir -p images
+          dl() { curl -fsSL --retry 3 -o "images/$1" "$2"; }
+          dl roasted-garlic-parmesan-protein-sauce.jpg 'https://scontent-mia3-2.cdninstagram.com/v/t51.82787-15/718111914_18378557971201309_6807363693063030352_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=105&ig_cache_key=MzkxMzQ5MjA4Njg2MTMzMDcwMA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuOTI4LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=WtrYSAmS7VwQ7kNvwHGZlEC&_nc_oc=Ado_GIN4-SlE9a2HFsX9lwjsgTnp1SJuElF0p_e7F4_7Qf-7XnqMQPOns9abp_HkwlY&_nc_zt=23&_nc_ht=scontent-mia3-2.cdninstagram.com&_nc_gid=Wm5Uq2H8dzJoWLlFFRypAg&_nc_ss=72a8c&oh=00_AQBHFn8NUW106Nfy08OqaDFE31wCilyaYvzkMwUr4SMEpg&oe=6A57354D'
+          dl smoky-chipotle-protein-sauce.jpg 'https://scontent-mia5-1.cdninstagram.com/v/t51.82787-15/719203069_18378557959201309_6289212112436349929_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=102&ig_cache_key=MzkxMzQ5MjA4MDg5Njg0MTUzMw%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuOTI4LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=epangtJxAbsQ7kNvwEw3tXu&_nc_oc=AdqHOAvw630kY-yHNMV0P3TFx4CYQ8TXStHcFqzujiQm7JrqECDgYgXhCjOeBX6F4_A&_nc_zt=23&_nc_ht=scontent-mia5-1.cdninstagram.com&_nc_gid=Wm5Uq2H8dzJoWLlFFRypAg&_nc_ss=72a8c&oh=00_AQAPDXTy7leeao-k4TtdQev7byYJ-qHDqzclpfDHa_zgRA&oe=6A573C4D'
+          dl creamy-cajun-yogurt-sauce.jpg 'https://scontent-mia3-3.cdninstagram.com/v/t51.82787-15/717129273_18378557998201309_9177363995408159075_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=108&ig_cache_key=MzkxMzQ5MjEyMjI3NzgxMzgxNg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuOTI4LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=_WdoOn92MK0Q7kNvwFrsW0o&_nc_oc=AdpildY_DYWsO_G-PKpDnhwvMGe0avDW9SiKvJqDitDVB7_hAlnT_HyYDncuAJrNR_0&_nc_zt=23&_nc_ht=scontent-mia3-3.cdninstagram.com&_nc_gid=Wm5Uq2H8dzJoWLlFFRypAg&_nc_ss=72a8c&oh=00_AQDp7mLoNiidbqdd6YAJWf-KbR5IUlT_lzNnJ9oPF6Bmjw&oe=6A57361C'
+          dl roasted-red-pepper-protein-sauce.jpg 'https://scontent-mia5-1.cdninstagram.com/v/t51.82787-15/717754880_18378558019201309_7483672465860208135_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=101&ig_cache_key=MzkxMzQ5MjEyMjgzOTkwMDI1MQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuOTI4LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=hDIMuwmHKSgQ7kNvwFbC28d&_nc_oc=AdoDG6dl3pNwuGE7WfVAJo3o18U7haDLs5O2W-f5vvbHItsCB1b7-0NqsgJzJciwd34&_nc_zt=23&_nc_ht=scontent-mia5-1.cdninstagram.com&_nc_gid=Wm5Uq2H8dzJoWLlFFRypAg&_nc_ss=72a8c&oh=00_AQDtr33axn28Jz30VCGvhWKGl0MER3ZmZEgZx2LODrc5wg&oe=6A571239'
+          dl peri-peri-garlic-yogurt-sauce.jpg 'https://scontent-mia5-1.cdninstagram.com/v/t51.82787-15/719475816_18378557941201309_214672736775179107_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=102&ig_cache_key=MzkxMzQ5MjA3NjIyNDM0NTcwMQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuOTI4LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=cCEX6nlhEBYQ7kNvwFZdBsn&_nc_oc=Adrz9vefsD3R_lCWu1KWHqPP_p41Z941817BQeeEPwQSSb3MgkAfLnYN6RnxBveMOdw&_nc_zt=23&_nc_ht=scontent-mia5-1.cdninstagram.com&_nc_gid=Wm5Uq2H8dzJoWLlFFRypAg&_nc_ss=72a8c&oh=00_AQBxTGdLFG2mBjNsfOEvsO2Z4qb5SRn7D-eQ-Ch4OJ9Ymw&oe=6A572DCE'
+          dl buffalo-protein-sauce.jpg 'https://scontent-mia3-2.cdninstagram.com/v/t51.82787-15/718618260_18378557989201309_366998415130957387_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=105&ig_cache_key=MzkxMzQ5MjA4NzI0NzA2NzEzMw%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuOTI4LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=JnFAiTRlLcMQ7kNvwH9XYBJ&_nc_oc=AdoZ5jHCmsElYuBnTHbpS3Sl5wZulnZYFh4NT0FkWn0fIzditL06zDNJ-F290tWelZQ&_nc_zt=23&_nc_ht=scontent-mia3-2.cdninstagram.com&_nc_gid=Wm5Uq2H8dzJoWLlFFRypAg&_nc_ss=72a8c&oh=00_AQAny7Ph6i_A-Ww-Ail9u-rW6Sl5ZK4bc2KcZXkjovFmgw&oe=6A570CF9'
+          dl lemon-herb-dill-protein-sauce.jpg 'https://scontent-mia3-1.cdninstagram.com/v/t51.82787-15/717582430_18378558028201309_7390445533936370196_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=111&ig_cache_key=MzkxMzQ5MjE0MzM2NjkyMzQ1NA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuOTI4LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=vt6YQR_osd8Q7kNvwFpQa8B&_nc_oc=Ado0V31qkr__s16aBYC7yKnftjtcsQkcPDdkC9TXKesu9B3p6reFA8nRSR1LLd7RU88&_nc_zt=23&_nc_ht=scontent-mia3-1.cdninstagram.com&_nc_gid=Wm5Uq2H8dzJoWLlFFRypAg&_nc_ss=72a8c&oh=00_AQBeNUbO2X8oNxMZ612SIgKnytJyo9ivhdn__O3Nh-Pp8w&oe=6A5713AC'
+
+      - name: Verify images are valid JPEGs
+        run: |
+          set -euo pipefail
+          for f in images/roasted-garlic-parmesan-protein-sauce.jpg images/smoky-chipotle-protein-sauce.jpg images/creamy-cajun-yogurt-sauce.jpg images/roasted-red-pepper-protein-sauce.jpg images/peri-peri-garlic-yogurt-sauce.jpg images/buffalo-protein-sauce.jpg images/lemon-herb-dill-protein-sauce.jpg; do
+            file "$f" | grep -q 'JPEG image data' || { echo "$f is not a JPEG"; exit 1; }
+            [ "$(stat -c%s "$f")" -gt 20000 ] || { echo "$f suspiciously small"; exit 1; }
+          done
+          ls -la images/
+
+      - name: Commit images and remove this workflow
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/
+          git rm .github/workflows/fetch-recipe-images.yml
+          git commit -m "Add images for the 7 high-protein sauces (self-removing workflow)"
+          git push
