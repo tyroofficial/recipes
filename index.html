@@ -61,12 +61,31 @@
   }
   #search:focus { border-color: var(--accent); }
 
-  .filters {
-    max-width: 1060px;
-    margin: 18px auto 0;
+  .layout {
+    max-width: 1200px;
+    margin: 24px auto 60px;
     padding: 0 20px;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
   }
-  .filter-group { margin-bottom: 12px; }
+  .sidebar {
+    position: sticky;
+    top: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+  }
+  .sidebar-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .filter-group { margin-bottom: 14px; }
   .filter-label {
     font-size: 0.72rem;
     font-weight: 600;
@@ -111,20 +130,20 @@
   #clear-filters.visible { display: inline-block; }
 
   .count {
-    max-width: 1060px;
-    margin: 18px auto 0;
-    padding: 0 20px;
     color: var(--ink-soft);
     font-size: 0.85rem;
   }
 
   .grid {
-    max-width: 1060px;
-    margin: 12px auto 60px;
-    padding: 0 20px;
+    margin-top: 12px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 20px;
+  }
+
+  @media (max-width: 760px) {
+    .layout { display: block; }
+    .sidebar { position: static; margin-bottom: 20px; }
   }
   .card {
     background: var(--card);
@@ -264,10 +283,16 @@
   <input id="search" type="search" placeholder="Search recipes…" aria-label="Search recipes">
 </div>
 
-<div class="filters" id="filters"></div>
-
-<div class="count" id="count"></div>
-<main class="grid" id="grid"></main>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-title">Filter by tag</div>
+    <div class="filters" id="filters"></div>
+  </aside>
+  <section>
+    <div class="count" id="count"></div>
+    <main class="grid" id="grid"></main>
+  </section>
+</div>
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
