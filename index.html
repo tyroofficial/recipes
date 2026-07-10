@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isaac's Recipes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf5ec;
+    --card: #fffdf8;
+    --ink: #3b2f2a;
+    --ink-soft: #7a6a60;
+    --accent: #c65d3b;
+    --accent-soft: #f3ddd2;
+    --green: #6b7f52;
+    --green-soft: #e6ead9;
+    --gold: #b98a2e;
+    --gold-soft: #f2e7cd;
+    --border: #e8ddcc;
+    --shadow: 0 2px 10px rgba(90, 60, 40, 0.08);
+    --radius: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    text-align: center;
+    padding: 40px 20px 12px;
+  }
+  header h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 700;
+    color: var(--ink);
+  }
+  header h1 span { color: var(--accent); }
+  header p { color: var(--ink-soft); margin-top: 6px; font-size: 0.95rem; }
+
+  .search-wrap {
+    max-width: 520px;
+    margin: 20px auto 0;
+    padding: 0 20px;
+  }
+  #search {
+    width: 100%;
+    padding: 12px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    background: var(--card);
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    outline: none;
+    box-shadow: var(--shadow);
+  }
+  #search:focus { border-color: var(--accent); }
+
+  .filters {
+    max-width: 1060px;
+    margin: 18px auto 0;
+    padding: 0 20px;
+  }
+  .filter-group { margin-bottom: 12px; }
+  .filter-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .chip.on.chip-time { background: var(--gold); border-color: var(--gold); }
+  .chip.on.chip-difficulty { background: var(--green); border-color: var(--green); }
+  #clear-filters {
+    display: none;
+    margin-top: 4px;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  #clear-filters.visible { display: inline-block; }
+
+  .count {
+    max-width: 1060px;
+    margin: 18px auto 0;
+    padding: 0 20px;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+  }
+
+  .grid {
+    max-width: 1060px;
+    margin: 12px auto 60px;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(90,60,40,0.14); }
+  .card-img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background: var(--accent-soft);
+    display: block;
+  }
+  .card-img-placeholder {
+    width: 100%;
+    height: 160px;
+    background: linear-gradient(135deg, var(--accent-soft), var(--gold-soft));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.6rem;
+  }
+  .card-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .card-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.12rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; }
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+  .tag-category { background: var(--accent-soft); color: #9c4526; }
+  .tag-time { background: var(--gold-soft); color: #8a661f; }
+  .tag-difficulty { background: var(--green-soft); color: #4e5f3a; }
+  .tag-flavor { background: #ece4f2; color: #6b4d8a; }
+
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 70px 20px;
+    color: var(--ink-soft);
+  }
+  .empty .emoji { font-size: 3rem; margin-bottom: 12px; }
+  .empty h2 { font-family: 'Fraunces', Georgia, serif; color: var(--ink); margin-bottom: 8px; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(45, 32, 25, 0.55);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 30px 16px;
+    z-index: 50;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    max-width: 640px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal-img { width: 100%; max-height: 300px; object-fit: cover; display: block; }
+  .modal-body { padding: 24px 28px 30px; }
+  .modal-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+  .modal h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.05rem;
+    margin: 18px 0 8px;
+    color: var(--accent);
+  }
+  .modal ul, .modal ol { padding-left: 22px; display: flex; flex-direction: column; gap: 6px; font-size: 0.93rem; line-height: 1.5; }
+  .modal .notes { font-size: 0.9rem; color: var(--ink-soft); font-style: italic; margin-top: 14px; }
+  .modal .source-link {
+    display: inline-block;
+    margin-top: 18px;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+  .modal .source-link:hover { text-decoration: underline; }
+  .modal-close {
+    position: sticky;
+    top: 0;
+    float: right;
+    margin: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--ink);
+    z-index: 2;
+  }
+  footer {
+    text-align: center;
+    padding: 0 20px 40px;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Isaac's <span>Recipes</span></h1>
+  <p>A growing collection of things worth cooking</p>
+</header>
+
+<div class="search-wrap">
+  <input id="search" type="search" placeholder="Search recipes…" aria-label="Search recipes">
+</div>
+
+<div class="filters" id="filters"></div>
+
+<div class="count" id="count"></div>
+<main class="grid" id="grid"></main>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+</div>
+
+<footer>Scan &amp; cook · updated whenever something delicious shows up</footer>
+
+<script src="recipes.js"></script>
+<script>
+(function () {
+  var RECIPES = window.RECIPES || [];
+
+  // ---- Tag definitions --------------------------------------------------
+  var CATEGORY_EMOJI = {
+    sauce: "🥫", meat: "🥩", vegetable: "🥦", seafood: "🐟", pasta: "🍝",
+    soup: "🍲", salad: "🥗", dessert: "🍰", bread: "🍞", breakfast: "🍳",
+    side: "🍟", main: "🍽️", drink: "🥤"
+  };
+  var TIME_LABELS = { quick: "Quick · under 30 min", medium: "Medium · 30–60 min", long: "Long · over 1 hr" };
+  var DIFF_LABELS = { easy: "Easy", medium: "Intermediate", hard: "Hard" };
+  var TIME_ORDER = ["quick", "medium", "long"];
+  var DIFF_ORDER = ["easy", "medium", "hard"];
+  var CORE_FLAVORS = ["spicy", "sweet", "savoury", "sour", "smoky", "fresh", "rich", "tangy", "herby", "garlicky"];
+
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function uniq(arr) { return arr.filter(function (v, i) { return arr.indexOf(v) === i; }); }
+
+  // Categories & flavors shown = whatever the recipes actually use
+  // (plus nothing extra, so chips never point at empty results).
+  var categories = uniq(RECIPES.map(function (r) { return r.category; }).filter(Boolean)).sort();
+  var flavors = uniq([].concat.apply([], RECIPES.map(function (r) { return r.flavors || []; }))).sort(function (a, b) {
+    var ai = CORE_FLAVORS.indexOf(a), bi = CORE_FLAVORS.indexOf(b);
+    if (ai === -1) ai = 99; if (bi === -1) bi = 99;
+    return ai - bi || a.localeCompare(b);
+  });
+
+  // ---- State ------------------------------------------------------------
+  var active = { category: [], time: [], difficulty: [], flavor: [] };
+  var query = "";
+
+  // ---- Render filters ----------------------------------------------------
+  var filtersEl = document.getElementById("filters");
+
+  function chipRow(label, group, values, labelFn) {
+    if (!values.length) return null;
+    var wrap = document.createElement("div");
+    wrap.className = "filter-group";
+    var lab = document.createElement("div");
+    lab.className = "filter-label";
+    lab.textContent = label;
+    wrap.appendChild(lab);
+    var chips = document.createElement("div");
+    chips.className = "chips";
+    values.forEach(function (v) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip chip-" + group;
+      b.textContent = labelFn ? labelFn(v) : cap(v);
+      b.setAttribute("data-group", group);
+      b.setAttribute("data-value", v);
+      b.addEventListener("click", function () {
+        var idx = active[group].indexOf(v);
+        if (idx === -1) active[group].push(v); else active[group].splice(idx, 1);
+        b.classList.toggle("on");
+        update();
+      });
+      chips.appendChild(b);
+    });
+    wrap.appendChild(chips);
+    return wrap;
+  }
+
+  function renderFilters() {
+    filtersEl.innerHTML = "";
+    var rows = [
+      chipRow("Type", "category", categories, function (v) { return (CATEGORY_EMOJI[v] ? CATEGORY_EMOJI[v] + " " : "") + cap(v); }),
+      chipRow("Time to make", "time", TIME_ORDER.filter(function (t) { return RECIPES.some(function (r) { return r.time === t; }); }), function (v) { return TIME_LABELS[v]; }),
+      chipRow("Difficulty", "difficulty", DIFF_ORDER.filter(function (d) { return RECIPES.some(function (r) { return r.difficulty === d; }); }), function (v) { return DIFF_LABELS[v]; }),
+      chipRow("Flavour", "flavor", flavors)
+    ];
+    rows.forEach(function (r) { if (r) filtersEl.appendChild(r); });
+
+    var clear = document.createElement("button");
+    clear.id = "clear-filters";
+    clear.textContent = "Clear all filters";
+    clear.addEventListener("click", function () {
+      active = { category: [], time: [], difficulty: [], flavor: [] };
+      query = "";
+      document.getElementById("search").value = "";
+      filtersEl.querySelectorAll(".chip.on").forEach(function (c) { c.classList.remove("on"); });
+      update();
+    });
+    filtersEl.appendChild(clear);
+  }
+
+  // ---- Filtering logic ---------------------------------------------------
+  // Within a group: OR (any selected value matches).
+  // Across groups: AND (recipe must satisfy every group with a selection).
+  function matches(r) {
+    if (active.category.length && active.category.indexOf(r.category) === -1) return false;
+    if (active.time.length && active.time.indexOf(r.time) === -1) return false;
+    if (active.difficulty.length && active.difficulty.indexOf(r.difficulty) === -1) return false;
+    if (active.flavor.length) {
+      var f = r.flavors || [];
+      var any = active.flavor.some(function (v) { return f.indexOf(v) !== -1; });
+      if (!any) return false;
+    }
+    if (query) {
+      var hay = (r.title + " " + (r.ingredients || []).join(" ") + " " + r.category + " " + (r.flavors || []).join(" ")).toLowerCase();
+      if (hay.indexOf(query) === -1) return false;
+    }
+    return true;
+  }
+
+  // ---- Render cards --------------------------------------------------------
+  var grid = document.getElementById("grid");
+  var countEl = document.getElementById("count");
+
+  function tagSpan(cls, text) {
+    return '<span class="tag ' + cls + '">' + text + "</span>";
+  }
+
+  function renderCards(list) {
+    grid.innerHTML = "";
+    if (!RECIPES.length) {
+      grid.innerHTML = '<div class="empty"><div class="emoji">🍳</div><h2>No recipes yet</h2><p>The first ones are coming soon — check back!</p></div>';
+      countEl.textContent = "";
+      return;
+    }
+    if (!list.length) {
+      grid.innerHTML = '<div class="empty"><div class="emoji">🔍</div><h2>Nothing matches</h2><p>Try removing a filter or two.</p></div>';
+      countEl.textContent = "0 of " + RECIPES.length + " recipes";
+      return;
+    }
+    countEl.textContent = list.length + " of " + RECIPES.length + " recipe" + (RECIPES.length === 1 ? "" : "s");
+    list.forEach(function (r) {
+      var card = document.createElement("article");
+      card.className = "card";
+      var imgHtml = r.image
+        ? '<img class="card-img" src="' + r.image + '" alt="" loading="lazy" onerror="this.outerHTML=\'<div class=card-img-placeholder>' + (CATEGORY_EMOJI[r.category] || "🍽️") + '</div>\'">'
+        : '<div class="card-img-placeholder">' + (CATEGORY_EMOJI[r.category] || "🍽️") + "</div>";
+      var tags = "";
+      if (r.category) tags += tagSpan("tag-category", cap(r.category));
+      if (r.time) tags += tagSpan("tag-time", TIME_LABELS[r.time] ? TIME_LABELS[r.time].split(" · ")[0] : cap(r.time));
+      if (r.difficulty) tags += tagSpan("tag-difficulty", DIFF_LABELS[r.difficulty] || cap(r.difficulty));
+      (r.flavors || []).forEach(function (f) { tags += tagSpan("tag-flavor", cap(f)); });
+      card.innerHTML = imgHtml + '<div class="card-body"><div class="card-title">' + r.title + '</div><div class="card-tags">' + tags + "</div></div>";
+      card.addEventListener("click", function () { openModal(r); });
+      grid.appendChild(card);
+    });
+  }
+
+  // ---- Modal -----------------------------------------------------------------
+  var overlay = document.getElementById("modal-overlay");
+  var modal = document.getElementById("modal");
+
+  function openModal(r) {
+    var html = '<button class="modal-close" aria-label="Close">✕</button>';
+    if (r.image) html += '<img class="modal-img" src="' + r.image + '" alt="">';
+    html += '<div class="modal-body"><div class="modal-title">' + r.title + "</div>";
+    var tags = "";
+    if (r.category) tags += tagSpan("tag-category", cap(r.category));
+    if (r.time) tags += tagSpan("tag-time", TIME_LABELS[r.time] || cap(r.time));
+    if (r.difficulty) tags += tagSpan("tag-difficulty", DIFF_LABELS[r.difficulty] || cap(r.difficulty));
+    (r.flavors || []).forEach(function (f) { tags += tagSpan("tag-flavor", cap(f)); });
+    html += '<div class="modal-tags">' + tags + "</div>";
+    if (r.ingredients && r.ingredients.length) {
+      html += "<h3>Ingredients</h3><ul>" + r.ingredients.map(function (i) { return "<li>" + i + "</li>"; }).join("") + "</ul>";
+    }
+    if (r.steps && r.steps.length) {
+      html += "<h3>Steps</h3><ol>" + r.steps.map(function (s) { return "<li>" + s + "</li>"; }).join("") + "</ol>";
+    }
+    if (r.notes) html += '<p class="notes">' + r.notes + "</p>";
+    if (r.source) html += '<a class="source-link" href="' + r.source + '" target="_blank" rel="noopener">View original post ↗</a>';
+    html += "</div>";
+    modal.innerHTML = html;
+    modal.querySelector(".modal-close").addEventListener("click", closeModal);
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeModal() {
+    overlay.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+  overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+
+  // ---- Search ---------------------------------------------------------------
+  document.getElementById("search").addEventListener("input", function (e) {
+    query = e.target.value.trim().toLowerCase();
+    update();
+  });
+
+  // ---- Update loop ------------------------------------------------------------
+  function update() {
+    var anyFilter = query || active.category.length || active.time.length || active.difficulty.length || active.flavor.length;
+    var clear = document.getElementById("clear-filters");
+    if (clear) clear.classList.toggle("visible", !!anyFilter);
+    renderCards(RECIPES.filter(matches));
+  }
+
+  renderFilters();
+  update();
+})();
+</script>
+</body>
+</html>
