@@ -1,0 +1,64 @@
+# Permanent image fetcher for the recipe site.
+# Create this file ONCE at: .github/workflows/fetch-recipe-images.yml
+#
+# How it works: whenever images-queue.json is committed to main (Claude can
+# commit that file — it's just text), this workflow downloads each listed
+# image on GitHub's servers (which can reach Instagram's CDN), verifies it's
+# a real JPEG, commits it into images/, and empties the queue. It stays in
+# the repo, so every future recipe add is fully automatic — no more manual
+# image uploads.
+#
+# First run: after creating this file, go to the Actions tab ->
+# "Fetch recipe images" -> "Run workflow" (the queue is already committed).
+
+name: Fetch recipe images
+
+on:
+  push:
+    branches: [main]
+    paths: ['images-queue.json']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download queued images
+        run: |
+          python3 - <<'EOF'
+          import json, pathlib, urllib.request, sys
+          p = pathlib.Path('images-queue.json')
+          if not p.exists():
+              print('No queue file — nothing to do.'); sys.exit(0)
+          items = json.loads(p.read_text())
+          if not items:
+              print('Queue is empty — nothing to do.'); sys.exit(0)
+          for it in items:
+              path = it['path']
+              dest = pathlib.Path(path)
+              if dest.parts[0] != 'images' or '..' in path:
+                  print('Skipping unsafe path:', path); continue
+              dest.parent.mkdir(exist_ok=True)
+              req = urllib.request.Request(it['url'], headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'})
+              try:
+                  data = urllib.request.urlopen(req, timeout=60).read()
+              except Exception as e:
+                  print('FAILED', path, '->', e); continue
+              if not data.startswith(b'\xff\xd8\xff'):
+                  print('Not a valid JPEG, skipping:', path); continue
+              dest.write_bytes(data)
+              print('Downloaded', path, f'({len(data)} bytes)')
+          EOF
+
+      - name: Commit images and clear queue
+        run: |
+          git config user.name "recipe-image-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo '[]' > images-queue.json
+          git add images/ images-queue.json
+          git diff --cached --quiet || { git commit -m "Add recipe images (auto)"; git push; }
