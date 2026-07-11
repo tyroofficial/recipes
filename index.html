@@ -96,6 +96,31 @@
     transition: border-color 0.15s ease;
   }
   #filter-btn:hover { border-color: var(--accent); }
+  #fridge-btn {
+    position: fixed;
+    top: 60px;
+    left: 14px;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s ease;
+  }
+  #fridge-btn:hover { border-color: var(--accent); }
+  .drawer-tools { padding: 0 18px; }
+  @media (max-width: 720px) {
+    header { padding-top: 104px; }
+  }
   #filter-count {
     display: none;
     background: var(--accent);
@@ -205,7 +230,7 @@
   }
   #clear-filters.visible { display: inline-block; }
 
-  /* Toolbar: sort / favourites / surprise */
+  /* Toolbar */
   .toolbar {
     max-width: 1060px;
     margin: 16px auto 0;
@@ -622,7 +647,6 @@
   .shop-empty { color: var(--ink-soft); font-size: 0.9rem; }
   .shop-have li { cursor: default; }
   .shop-have li span { opacity: 0.55; text-decoration: line-through; }
-
   /* Fridge panel */
   .fridge-sub { font-size: 0.88rem; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.5; }
   .fridge-group-label {
@@ -678,7 +702,7 @@
   /* Print: just the open recipe, clean */
   @media print {
     header, .search-wrap, .search-hint, .filters, .toolbar, .count, .grid, footer,
-    #filter-btn, #filter-drawer, #drawer-backdrop,
+    #filter-btn, #fridge-btn, #filter-drawer, #drawer-backdrop,
     .fab, #timers, #toast, .cook-overlay, .shop-overlay, .fridge-overlay,
     .modal-close, .action-row, .scale-row, .reset-checks { display: none !important; }
     body { background: #fff; }
@@ -707,6 +731,7 @@
   Filters
   <span id="filter-count"></span>
 </button>
+<button type="button" id="fridge-btn">🧊 My fridge</button>
 
 <div id="drawer-backdrop"></div>
 <aside id="filter-drawer" role="dialog" aria-label="Filters">
@@ -714,18 +739,27 @@
     <h2>Filters</h2>
     <button type="button" id="drawer-close" aria-label="Close filters">&times;</button>
   </div>
+  <div class="drawer-tools">
+    <div class="filter-group">
+      <div class="filter-label">Sort</div>
+      <select id="sort" aria-label="Sort recipes">
+        <option value="new">Newest first</option>
+        <option value="az">A–Z</option>
+        <option value="quick">Quickest first</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Show</div>
+      <div class="chips">
+        <button type="button" id="fav-toggle" class="chip">♥ Favourites</button>
+      </div>
+    </div>
+  </div>
   <div class="filters" id="filters"></div>
 </aside>
 
 <div class="toolbar">
-  <select id="sort" aria-label="Sort recipes">
-    <option value="new">Newest first</option>
-    <option value="az">A–Z</option>
-    <option value="quick">Quickest first</option>
-  </select>
-  <button type="button" id="fav-toggle" class="chip">♥ Favourites</button>
   <button type="button" id="surprise" class="chip">🎲 Surprise me</button>
-  <button type="button" id="fridge-btn" class="chip">🧊 My fridge</button>
 </div>
 
 <div class="count" id="count"></div>
@@ -1827,7 +1861,7 @@
     var anyFilter = query || favOnly || fridgeMode || active.category.length || active.time.length || active.difficulty.length || active.flavor.length;
     var clear = document.getElementById("clear-filters");
     if (clear) clear.classList.toggle("visible", !!anyFilter);
-    var nActive = active.category.length + active.time.length + active.difficulty.length + active.flavor.length;
+    var nActive = active.category.length + active.time.length + active.difficulty.length + active.flavor.length + (favOnly ? 1 : 0);
     var fcount = document.getElementById("filter-count");
     if (fcount) { fcount.textContent = nActive; fcount.classList.toggle("visible", nActive > 0); }
     var list = sorted(RECIPES.filter(matches));
