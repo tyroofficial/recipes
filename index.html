@@ -230,16 +230,6 @@
   }
   #clear-filters.visible { display: inline-block; }
 
-  /* Toolbar */
-  .toolbar {
-    max-width: 1060px;
-    margin: 16px auto 0;
-    padding: 0 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-  }
   #sort {
     border: 1.5px solid var(--border);
     background: var(--card);
@@ -702,7 +692,7 @@
 
   /* Print: just the open recipe, clean */
   @media print {
-    header, .search-wrap, .search-hint, .filters, .toolbar, .count, .grid, footer,
+    header, .search-wrap, .search-hint, .filters, .count, .grid, footer,
     #filter-btn, #fridge-btn, #filter-drawer, #drawer-backdrop,
     .fab, #timers, #toast, .cook-overlay, .shop-overlay, .fridge-overlay,
     .modal-close, .action-row, .scale-row, .reset-checks { display: none !important; }
@@ -758,10 +748,6 @@
   </div>
   <div class="filters" id="filters"></div>
 </aside>
-
-<div class="toolbar">
-  <button type="button" id="surprise" class="chip">🎲 Surprise me</button>
-</div>
 
 <div class="count" id="count"></div>
 <main class="grid" id="grid"></main>
@@ -1830,7 +1816,7 @@
     }
   });
 
-  // ---- Toolbar ----------------------------------------------------------------------
+  // ---- Sort / favourites -------------------------------------------------------------
   var sortSel = document.getElementById("sort");
   sortSel.value = sortMode;
   sortSel.addEventListener("change", function () {
@@ -1843,14 +1829,6 @@
     this.classList.toggle("on", favOnly);
     update();
   });
-  document.getElementById("surprise").addEventListener("click", function () {
-    var pool = RECIPES.filter(matches);
-    if (!pool.length) pool = RECIPES;
-    if (!pool.length) return;
-    var r = pool[Math.floor(Math.random() * pool.length)];
-    openModal(r);
-  });
-
   // ---- Search ---------------------------------------------------------------
   document.getElementById("search").addEventListener("input", function (e) {
     query = e.target.value.trim().toLowerCase();
