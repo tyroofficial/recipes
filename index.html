@@ -74,10 +74,92 @@
     margin-top: 6px;
   }
 
+  /* Filter drawer */
+  #filter-btn {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s ease;
+  }
+  #filter-btn:hover { border-color: var(--accent); }
+  #filter-count {
+    display: none;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    padding: 0 4px;
+  }
+  #filter-count.visible { display: inline-block; }
+  #drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(45, 32, 25, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 60;
+  }
+  #drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+  #filter-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(320px, 86vw);
+    background: var(--bg);
+    box-shadow: 4px 0 24px rgba(45, 32, 25, 0.18);
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+    z-index: 61;
+    display: flex;
+    flex-direction: column;
+  }
+  #filter-drawer.open { transform: translateX(0); }
+  .drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 10px;
+  }
+  .drawer-head h2 {
+    font-size: 1.05rem;
+    margin: 0;
+    color: var(--ink);
+  }
+  #drawer-close {
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--ink-soft);
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  #drawer-close:hover { color: var(--ink); }
   .filters {
-    max-width: 1060px;
-    margin: 18px auto 0;
-    padding: 0 20px;
+    overflow-y: auto;
+    padding: 0 18px 24px;
   }
   .filter-group { margin-bottom: 12px; }
   .filter-label {
@@ -596,6 +678,7 @@
   /* Print: just the open recipe, clean */
   @media print {
     header, .search-wrap, .search-hint, .filters, .toolbar, .count, .grid, footer,
+    #filter-btn, #filter-drawer, #drawer-backdrop,
     .fab, #timers, #toast, .cook-overlay, .shop-overlay, .fridge-overlay,
     .modal-close, .action-row, .scale-row, .reset-checks { display: none !important; }
     body { background: #fff; }
@@ -619,7 +702,20 @@
   <div class="search-hint">Search by name or ingredient</div>
 </div>
 
-<div class="filters" id="filters"></div>
+<button type="button" id="filter-btn" aria-expanded="false" aria-controls="filter-drawer">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M3 5h18M6.5 12h11M10 19h4"/></svg>
+  Filters
+  <span id="filter-count"></span>
+</button>
+
+<div id="drawer-backdrop"></div>
+<aside id="filter-drawer" role="dialog" aria-label="Filters">
+  <div class="drawer-head">
+    <h2>Filters</h2>
+    <button type="button" id="drawer-close" aria-label="Close filters">&times;</button>
+  </div>
+  <div class="filters" id="filters"></div>
+</aside>
 
 <div class="toolbar">
   <select id="sort" aria-label="Sort recipes">
@@ -1664,10 +1760,31 @@
   fridgeOverlay.addEventListener("click", function (e) { if (e.target === fridgeOverlay) closeFridge(); });
   document.getElementById("fridge-btn").addEventListener("click", function () { openFridge(); });
 
+  // ---- Filter drawer ---------------------------------------------------------------
+  var drawer = document.getElementById("filter-drawer");
+  var drawerBackdrop = document.getElementById("drawer-backdrop");
+  var filterBtn = document.getElementById("filter-btn");
+  function openDrawer() {
+    drawer.classList.add("open");
+    drawerBackdrop.classList.add("open");
+    filterBtn.setAttribute("aria-expanded", "true");
+  }
+  function closeDrawer() {
+    drawer.classList.remove("open");
+    drawerBackdrop.classList.remove("open");
+    filterBtn.setAttribute("aria-expanded", "false");
+  }
+  filterBtn.addEventListener("click", function () {
+    if (drawer.classList.contains("open")) closeDrawer(); else openDrawer();
+  });
+  document.getElementById("drawer-close").addEventListener("click", closeDrawer);
+  drawerBackdrop.addEventListener("click", closeDrawer);
+
   // ---- Keyboard --------------------------------------------------------------------
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       if (cookOpen) closeCook();
+      else if (drawer.classList.contains("open")) closeDrawer();
       else if (fridgeOverlay.classList.contains("open")) closeFridge();
       else if (shopOverlay.classList.contains("open")) closeShop();
       else closeModal();
@@ -1710,6 +1827,9 @@
     var anyFilter = query || favOnly || fridgeMode || active.category.length || active.time.length || active.difficulty.length || active.flavor.length;
     var clear = document.getElementById("clear-filters");
     if (clear) clear.classList.toggle("visible", !!anyFilter);
+    var nActive = active.category.length + active.time.length + active.difficulty.length + active.flavor.length;
+    var fcount = document.getElementById("filter-count");
+    if (fcount) { fcount.textContent = nActive; fcount.classList.toggle("visible", nActive > 0); }
     var list = sorted(RECIPES.filter(matches));
     if (fridgeMode) {
       list.sort(function (a, b) { return missingItems(a).length - missingItems(b).length; });
