@@ -333,7 +333,6 @@
   .abtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
   .abtn.on { background: var(--green); border-color: var(--green); color: #fff; }
   .abtn.fav-on { background: #c0392b; border-color: #c0392b; color: #fff; }
-  .abtn:disabled { opacity: 0.55; cursor: default; }
 
   /* Scale + unit rows */
   .scale-row {
@@ -568,22 +567,6 @@
   .have-badge.ok { background: var(--green-soft); color: #4e5f3a; }
   .have-badge.miss { background: var(--gold-soft); color: #8a661f; }
 
-  /* Add recipe */
-  .add-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    background: var(--bg);
-    font: inherit;
-    font-size: 0.95rem;
-    color: var(--ink);
-    outline: none;
-    margin-top: 4px;
-  }
-  .add-input:focus { border-color: var(--accent); }
-  .add-note { font-size: 0.8rem; color: var(--ink-soft); margin-top: 14px; line-height: 1.5; }
-
   /* Toast */
   #toast {
     position: fixed;
@@ -613,7 +596,7 @@
   /* Print: just the open recipe, clean */
   @media print {
     header, .search-wrap, .search-hint, .filters, .toolbar, .count, .grid, footer,
-    .fab, #timers, #toast, .cook-overlay, .shop-overlay, .fridge-overlay, .add-overlay,
+    .fab, #timers, #toast, .cook-overlay, .shop-overlay, .fridge-overlay,
     .modal-close, .action-row, .scale-row, .reset-checks { display: none !important; }
     body { background: #fff; }
     .modal-overlay { position: static; display: block !important; padding: 0; background: none; overflow: visible; }
@@ -647,7 +630,6 @@
   <button type="button" id="fav-toggle" class="chip">♥ Favourites</button>
   <button type="button" id="surprise" class="chip">🎲 Surprise me</button>
   <button type="button" id="fridge-btn" class="chip">🧊 My fridge</button>
-  <button type="button" id="add-btn" class="chip">➕ Add recipe</button>
 </div>
 
 <div class="count" id="count"></div>
@@ -663,10 +645,6 @@
 
 <div class="modal-overlay fridge-overlay" id="fridge-overlay">
   <div class="modal" id="fridge-modal" role="dialog" aria-modal="true"></div>
-</div>
-
-<div class="modal-overlay add-overlay" id="add-overlay">
-  <div class="modal" id="add-modal" role="dialog" aria-modal="true"></div>
 </div>
 
 <div class="cook-overlay" id="cook-overlay">
@@ -697,15 +675,6 @@
 
 <footer>Scan &amp; cook · updated whenever something delicious shows up</footer>
 
-<script>
-  // --- One-time config ---------------------------------------------------
-  // Instacart ordering: once the Cloudflare Worker is deployed (see
-  // README.md → "Instacart ordering"), paste its URL here, e.g.
-  // "https://instacart-proxy.YOUR-SUBDOMAIN.workers.dev". Leave "" to disable.
-  window.INSTACART_PROXY_URL = "";
-  // GitHub repo that stores this site — used by the ➕ Add recipe form.
-  window.RECIPES_REPO = "tyroofficial/recipes";
-</script>
 <script src="recipes.js"></script>
 <script>
 (function () {
@@ -1498,44 +1467,6 @@
     return lines.join("\n");
   }
 
-  // Build an Instacart cart from the unticked items and open it in a new tab.
-  function orderInstacart(btn, b, needKeys) {
-    if (!window.INSTACART_PROXY_URL) {
-      showToast("Instacart isn't hooked up yet — see README on GitHub");
-      return;
-    }
-    var items = needKeys.filter(function (k) { return !shopChecks[k]; }).map(function (k) {
-      var it = b.map[k];
-      return {
-        name: extractItem(it.text) || it.text,
-        display_text: it.text + (it.count > 1 ? " ×" + it.count : "")
-      };
-    });
-    if (!items.length) { showToast("Everything's ticked off — nothing to order"); return; }
-    var orig = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = "🥕 Building your cart…";
-    function done() { btn.disabled = false; btn.textContent = orig; }
-    var win = window.open("", "_blank");
-    fetch(window.INSTACART_PROXY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: "Isaac's Recipes — shopping list", items: items })
-    }).then(function (r) { return r.json(); }).then(function (data) {
-      if (data && data.url) {
-        if (win) win.location = data.url; else window.open(data.url, "_blank");
-        showToast("Cart's ready — pick your store 🥕");
-      } else {
-        throw new Error((data && data.error) || "No URL returned");
-      }
-      done();
-    }).catch(function () {
-      if (win) { try { win.close(); } catch (e) {} }
-      showToast("Couldn't reach Instacart — try again in a minute");
-      done();
-    });
-  }
-
   function openShop() {
     var b = null, needKeys = [], haveKeys = [];
     var html = '<button class="modal-close" type="button" aria-label="Close">✕</button>';
@@ -1572,8 +1503,7 @@
           }).join("") + "</ul>";
       }
       html += '<div class="shop-actions">';
-      html += '<button type="button" class="abtn primary" id="shop-instacart">🥕 Order on Instacart</button>';
-      html += '<button type="button" class="abtn" id="shop-copy">📋 Copy list</button>';
+      html += '<button type="button" class="abtn primary" id="shop-copy">📋 Copy list</button>';
       if (navigator.share) html += '<button type="button" class="abtn" id="shop-share">↗ Share</button>';
       html += '<button type="button" class="abtn" id="shop-clear">Clear list</button>';
       html += "</div></div>";
@@ -1621,9 +1551,6 @@
           });
         });
       }
-      shopModal.querySelector("#shop-instacart").addEventListener("click", function () {
-        orderInstacart(this, b, needKeys);
-      });
       shopModal.querySelector("#shop-copy").addEventListener("click", function () {
         var t = shoppingText();
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1737,53 +1664,10 @@
   fridgeOverlay.addEventListener("click", function (e) { if (e.target === fridgeOverlay) closeFridge(); });
   document.getElementById("fridge-btn").addEventListener("click", function () { openFridge(); });
 
-  // ---- Add recipe (Instagram link → GitHub issue → Action does the rest) ---------
-  var addOverlay = document.getElementById("add-overlay");
-  var addModal = document.getElementById("add-modal");
-
-  function openAdd() {
-    var html = '<button class="modal-close" type="button" aria-label="Close">✕</button><div class="modal-body">';
-    html += '<div class="modal-title">➕ Add a recipe</div>';
-    html += '<p class="fridge-sub">Paste an Instagram reel or post. The kitchen robots scrape it, write it up, tag it, and publish it here — usually within a few minutes.</p>';
-    html += '<input class="add-input" id="add-url" type="url" inputmode="url" autocomplete="off" placeholder="https://www.instagram.com/reel/…" aria-label="Instagram link">';
-    html += '<div class="fridge-actions"><button type="button" class="abtn primary" id="add-go">Add it 👨‍🍳</button></div>';
-    html += '<p class="add-note">This opens GitHub with everything pre-filled — just press <b>Submit new issue</b> (you need to be signed in to GitHub). When it\'s done, the recipe appears here on refresh.</p>';
-    html += "</div>";
-    addModal.innerHTML = html;
-    addModal.querySelector(".modal-close").addEventListener("click", closeAdd);
-
-    var input = addModal.querySelector("#add-url");
-    function go() {
-      var url = (input.value || "").trim();
-      if (!/^https?:\/\/(www\.)?instagram\.com\/(reel|reels|p|tv|share)\//i.test(url)) {
-        showToast("That doesn't look like an Instagram post link");
-        return;
-      }
-      var title = encodeURIComponent("Add recipe: " + url);
-      var body = encodeURIComponent(url + "\n\n_Submitted from the recipe site._");
-      window.open("https://github.com/" + (window.RECIPES_REPO || "") + "/issues/new?labels=add-recipe&title=" + title + "&body=" + body, "_blank");
-      closeAdd();
-      showToast("Now press “Submit new issue” on GitHub");
-    }
-    addModal.querySelector("#add-go").addEventListener("click", go);
-    input.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
-
-    addOverlay.classList.add("open");
-    document.body.style.overflow = "hidden";
-    setTimeout(function () { input.focus(); }, 50);
-  }
-  function closeAdd() {
-    addOverlay.classList.remove("open");
-    if (!overlay.classList.contains("open")) document.body.style.overflow = "";
-  }
-  addOverlay.addEventListener("click", function (e) { if (e.target === addOverlay) closeAdd(); });
-  document.getElementById("add-btn").addEventListener("click", openAdd);
-
   // ---- Keyboard --------------------------------------------------------------------
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       if (cookOpen) closeCook();
-      else if (addOverlay.classList.contains("open")) closeAdd();
       else if (fridgeOverlay.classList.contains("open")) closeFridge();
       else if (shopOverlay.classList.contains("open")) closeShop();
       else closeModal();
