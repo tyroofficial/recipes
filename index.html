@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#faf5ec">
-<title>Isaac's Recipes</title>
+<title>Archived Recipes</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
@@ -610,7 +610,7 @@
 <body>
 
 <header>
-  <h1>Isaac's <span>Recipes</span></h1>
+  <h1>Archived <span>Recipes</span></h1>
   <p>A growing collection of things worth cooking</p>
 </header>
 
@@ -684,7 +684,7 @@
 
   // ---- Tag definitions --------------------------------------------------
   var CATEGORY_EMOJI = {
-    sauce: "🥫", meat: "🥩", vegetable: "🥦", seafood: "🐟", pasta: "🍝",
+    sauce: "🥫", chicken: "🍗", beef: "🥩", pork: "🥓", lamb: "🍖", vegetable: "🥦", seafood: "🐟", pasta: "🍝",
     soup: "🍲", salad: "🥗", dessert: "🍰", bread: "🍞", breakfast: "🍳",
     side: "🍟", main: "🍽️", drink: "🥤"
   };
@@ -1314,7 +1314,7 @@
   function shareRecipe(r) {
     var url = location.origin + location.pathname + "#" + encodeURIComponent(r.id);
     if (navigator.share) {
-      navigator.share({ title: r.title + " — Isaac's Recipes", url: url }).catch(function () {});
+      navigator.share({ title: r.title + " — Archived Recipes", url: url }).catch(function () {});
     } else if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(function () { showToast("Link copied"); }, function () { showToast(url); });
     } else {
@@ -1456,7 +1456,7 @@
   function shoppingText() {
     var b = buildShopping();
     var names = cart.map(function (id) { return byId[id] ? byId[id].title : id; });
-    var lines = ["Shopping list — Isaac's Recipes", "(" + names.join(", ") + ")", ""];
+    var lines = ["Shopping list — Archived Recipes", "(" + names.join(", ") + ")", ""];
     var skipped = 0;
     b.order.forEach(function (k) {
       var it = b.map[k];

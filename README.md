@@ -1,4 +1,4 @@
-# Isaac's Recipes — site guide
+# Archived Recipes — site guide
 
 Live at **https://tyroofficial.github.io/recipes/** — the URL and QR code never change.
 
@@ -46,7 +46,7 @@ ALL of the following automatically:
   title: "Recipe Name",
   image: "images/slug.jpg",     // stored in the repo
   source: "https://instagram…", // original post
-  category: "sauce",            // sauce|meat|vegetable|seafood|pasta|soup|salad|dessert|bread|breakfast|side|main|drink
+  category: "sauce",            // sauce|chicken|beef|pork|lamb|vegetable|seafood|pasta|soup|salad|dessert|bread|breakfast|side|main|drink
   time: "quick",                // quick (<30m) | medium (30–60m) | long (>1h)
   difficulty: "easy",           // easy | medium | hard
   flavors: ["fresh", "spicy"],  // spicy|sweet|savoury|sour|smoky|fresh|rich|tangy|herby|garlicky
