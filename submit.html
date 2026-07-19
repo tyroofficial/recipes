@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#e3e9dc">
+<title>Add a Recipe — Archived Recipes</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --ink: #333d31;
+    --ink-soft: #5c6957;
+    --deep: #3f4a3c;
+    --glass: rgba(255, 255, 255, 0.55);
+    --glass-soft: rgba(255, 255, 255, 0.45);
+    --hairline: inset 0 1px 1px rgba(255, 255, 255, 0.55);
+    --lift: 0 8px 24px rgba(63, 74, 60, 0.12);
+    --warm: #b2543f;
+    --radius: 22px;
+    --sans: -apple-system, "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(170deg, #e3e9dc 0%, #ccd6c3 38%, #a8b79e 70%, #8b9c83 100%);
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 22px 18px 40px;
+  }
+  .back-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--glass);
+    color: #4c584a;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 999px;
+    box-shadow: var(--hairline), 0 4px 14px rgba(63, 74, 60, 0.1);
+    text-decoration: none;
+  }
+  h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-top: 22px;
+  }
+  h1 .dot { color: var(--ink-soft); }
+  .sub {
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.5;
+    margin-top: 10px;
+    max-width: 440px;
+  }
+  .card {
+    background: var(--glass);
+    border-radius: var(--radius);
+    box-shadow: var(--hairline), var(--lift);
+    padding: 22px 18px;
+    margin-top: 24px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  input[type="url"] {
+    width: 100%;
+    padding: 13px 20px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: var(--hairline);
+    font: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+  }
+  input[type="url"]::placeholder { color: var(--ink-soft); }
+  input[type="url"]:focus { box-shadow: var(--hairline), 0 0 0 2px rgba(63, 74, 60, 0.35); }
+  button {
+    font-family: var(--sans);
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px 20px;
+    border: none;
+    border-radius: 999px;
+    background: var(--deep);
+    color: #eef2ea;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(63, 74, 60, 0.25);
+  }
+  button:active { transform: scale(0.99); }
+  button:disabled { opacity: 0.55; cursor: default; }
+  .msg {
+    margin-top: 14px;
+    padding: 13px 16px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.45;
+    display: none;
+    box-shadow: var(--hairline);
+  }
+  .msg.ok { display: block; background: rgba(255, 255, 255, 0.6); color: var(--deep); }
+  .msg.err { display: block; background: rgba(178, 84, 63, 0.14); color: var(--warm); }
+  .hint {
+    margin-top: 18px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back-pill" href="index.html">← Recipes</a>
+  <h1>Add a recipe<span class="dot">.</span></h1>
+  <p class="sub">Found something worth cooking on TikTok or Instagram? Press <strong>Share → Copy link</strong> on the video, then paste it here.</p>
+
+  <div class="card">
+    <form id="form">
+      <label for="url">Video link</label>
+      <input type="url" id="url" placeholder="https://www.tiktok.com/… or instagram.com/…" required autocomplete="off">
+      <button type="submit" id="btn">Send it in</button>
+    </form>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <p class="hint">The link goes straight to the kitchen — once the recipe is written up, it'll appear on the site.</p>
+</div>
+
+<script>
+  var WORKER_URL = "https://recipe-inbox.tylerrodens937.workers.dev";
+
+  var form = document.getElementById("form");
+  var input = document.getElementById("url");
+  var btn = document.getElementById("btn");
+  var msg = document.getElementById("msg");
+
+  // If opened via a share intent (?url=... or ?text=...), pre-fill the box
+  var params = new URLSearchParams(location.search);
+  var shared = params.get("url") || params.get("text") || "";
+  var sharedLink = shared.match(/https:\/\/\S+/);
+  if (sharedLink) input.value = sharedLink[0];
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    msg.className = "msg";
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+    try {
+      var res = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: input.value.trim() })
+      });
+      var data = await res.json();
+      if (res.ok && data.ok) {
+        msg.textContent = "Sent! The recipe will show up on the site once it's been written up.";
+        msg.className = "msg ok";
+        form.reset();
+      } else {
+        msg.textContent = data.error || "Something went wrong — try again in a minute.";
+        msg.className = "msg err";
+      }
+    } catch (err) {
+      msg.textContent = "Couldn't reach the kitchen — check your connection and try again.";
+      msg.className = "msg err";
+    }
+    btn.disabled = false;
+    btn.textContent = "Send it in";
+  });
+</script>
+</body>
+</html>
